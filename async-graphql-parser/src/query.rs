@@ -28,10 +28,7 @@ pub struct Directive {
 
 impl Directive {
     pub fn get_argument(&self, name: &str) -> Option<&Positioned<Value>> {
-        self.arguments
-            .iter()
-            .find(|item| item.0.node == name)
-            .map(|item| &item.1)
+        get_argument(&self.arguments, name)
     }
 }
 
@@ -222,10 +219,7 @@ pub struct Field {
 
 impl Field {
     pub fn get_argument(&self, name: &str) -> Option<&Positioned<Value>> {
-        self.arguments
-            .iter()
-            .find(|item| item.0.node == name)
-            .map(|item| &item.1)
+        get_argument(&self.arguments, name)
     }
 }
 
@@ -240,4 +234,14 @@ pub struct InlineFragment {
     pub type_condition: Option<Positioned<TypeCondition>>,
     pub directives: Vec<Positioned<Directive>>,
     pub selection_set: Positioned<SelectionSet>,
+}
+
+fn get_argument<'a>(
+    arguments: &'a Vec<(Positioned<String>, Positioned<Value>)>,
+    name: &str,
+) -> Option<&'a Positioned<Value>> {
+    arguments
+        .iter()
+        .find(|item| item.0.node == name)
+        .map(|item| &item.1)
 }

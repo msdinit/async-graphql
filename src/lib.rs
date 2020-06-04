@@ -108,6 +108,7 @@ extern crate log;
 
 mod base;
 mod context;
+mod directives;
 mod error;
 mod look_ahead;
 mod model;
@@ -169,7 +170,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 // internal types
 #[doc(hidden)]
-pub use context::ContextSelectionSet;
+pub use context::{ContextDirective, ContextSelectionSet};
 #[doc(hidden)]
 pub mod registry;
 #[doc(hidden)]

@@ -129,6 +129,9 @@ impl Data {
 /// Context for `SelectionSet`
 pub type ContextSelectionSet<'a> = ContextBase<'a, &'a Positioned<SelectionSet>>;
 
+/// Context for `Directive`
+pub type ContextDirective<'a> = ContextBase<'a, &'a Positioned<Directive>>;
+
 /// Context object for resolve field
 pub type Context<'a> = ContextBase<'a, &'a Positioned<Field>>;
 
@@ -509,6 +512,35 @@ impl<'a, T> ContextBase<'a, T> {
     pub fn is_stream(&self, directives: &[Positioned<Directive>]) -> bool {
         directives.iter().any(|d| d.name.node == "stream")
     }
+
+    fn get_param_value<I: InputValueType>(
+        &self,
+        value: Option<Positioned<Value>>,
+        default: Option<fn() -> I>,
+    ) -> Result<I> {
+        if let Some(default) = default {
+            if value.is_none() {
+                return Ok(default());
+            }
+        }
+        let pos = value
+            .as_ref()
+            .map(|value| value.position())
+            .unwrap_or_default();
+        let value = match value {
+            Some(value) => {
+                let mut new_value = value.into_inner();
+                self.resolve_input_value(&mut new_value, pos)?;
+                Some(new_value)
+            }
+            None => None,
+        };
+
+        match InputValueType::parse(value) {
+            Ok(res) => Ok(res),
+            Err(err) => Err(err.into_error(pos, I::qualified_type_name())),
+        }
+    }
 }
 
 impl<'a> ContextBase<'a, &'a Positioned<SelectionSet>> {
@@ -536,29 +568,7 @@ impl<'a> ContextBase<'a, &'a Positioned<Field>> {
         name: &str,
         default: Option<fn() -> T>,
     ) -> Result<T> {
-        let value = self.get_argument(name).cloned();
-        if let Some(default) = default {
-            if value.is_none() {
-                return Ok(default());
-            }
-        }
-        let pos = value
-            .as_ref()
-            .map(|value| value.position())
-            .unwrap_or_default();
-        let value = match value {
-            Some(value) => {
-                let mut new_value = value.into_inner();
-                self.resolve_input_value(&mut new_value, pos)?;
-                Some(new_value)
-            }
-            None => None,
-        };
-
-        match InputValueType::parse(value) {
-            Ok(res) => Ok(res),
-            Err(err) => Err(err.into_error(pos, T::qualified_type_name())),
-        }
+        self.get_param_value(self.get_argument(name).cloned(), default)
     }
 
     #[doc(hidden)]
@@ -568,11 +578,6 @@ impl<'a> ContextBase<'a, &'a Positioned<Field>> {
             .as_ref()
             .map(|alias| alias.as_str())
             .unwrap_or_else(|| self.item.name.as_str())
-    }
-
-    /// Get the position of the current field in the query code.
-    pub fn position(&self) -> Pos {
-        self.pos
     }
 
     /// Creates a uniform interface to inspect the forthcoming selections.
@@ -617,5 +622,16 @@ impl<'a> ContextBase<'a, &'a Positioned<Field>> {
             document: &self.query_env.document,
             field: Some(&self.item.node),
         }
+    }
+}
+
+impl<'a> ContextBase<'a, &'a Positioned<Directive>> {
+    #[doc(hidden)]
+    pub fn param_value<T: InputValueType>(
+        &self,
+        name: &str,
+        default: Option<fn() -> T>,
+    ) -> Result<T> {
+        self.get_param_value(self.get_argument(name).cloned(), default)
     }
 }
