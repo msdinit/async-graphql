@@ -92,12 +92,6 @@ pub fn generate(object_args: &args::Object, input: &mut DeriveInput) -> Result<T
                 });
 
                 let ident = &item.ident;
-                let guard = field
-                    .guard
-                    .map(|guard| quote! { #guard.check(ctx).await.map_err(|err| err.into_error_with_path(ctx.position(), ctx.path_node.as_ref().unwrap().to_json()))?; });
-                let post_guard = field
-                    .post_guard
-                    .map(|guard| quote! { #guard.check(ctx, &res).await.map_err(|err| err.into_error_with_path(ctx.position(), ctx.path_node.as_ref().unwrap().to_json()))?; });
 
                 let features = &field.features;
                 getters.push(if field.is_ref {
@@ -132,10 +126,8 @@ pub fn generate(object_args: &args::Object, input: &mut DeriveInput) -> Result<T
 
                 resolvers.push(quote! {
                     if ctx.name.node == #field_name {
-                        #guard
                         let res = self.#ident(ctx).await.map_err(|err| err.into_error_with_path(ctx.position(), ctx.path_node.as_ref().unwrap().to_json()))?;
                         let ctx_obj = ctx.with_selection_set(&ctx.selection_set);
-                        #post_guard
                         return #crate_name::OutputValueType::resolve(&res, &ctx_obj, ctx.item).await;
                     }
                 });

@@ -10,7 +10,7 @@ pub async fn test_custom_directive() {
         Admin,
     }
 
-    // #[Directive]
+    #[Directive]
     struct Auth {
         role: Role,
     }

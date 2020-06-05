@@ -1,9 +1,9 @@
 use crate::context::ContextDirective;
-use crate::FieldResult;
+use crate::{Directive, FieldResult};
 
 #[async_trait::async_trait]
 #[allow(unused_variables)]
-pub trait OnFieldDefinition {
+pub trait OnFieldDefinition: Directive {
     async fn before_field_resolve(&self, ctx: &ContextDirective<'_>) -> FieldResult<()> {
         Ok(())
     }

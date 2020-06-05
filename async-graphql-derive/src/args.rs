@@ -1,10 +1,7 @@
-use crate::utils::{
-    get_rustdoc, parse_default, parse_default_with, parse_guards, parse_post_guards,
-    parse_validator,
-};
+use crate::utils::{get_rustdoc, parse_default, parse_default_with, parse_validator};
 use proc_macro2::TokenStream;
 use quote::quote;
-use syn::{Attribute, AttributeArgs, Error, Lit, Meta, MetaList, NestedMeta, Path, Result, Type};
+use syn::{Attribute, AttributeArgs, Error, Lit, Meta, MetaList, NestedMeta, Result, Type};
 
 pub struct CacheControl {
     pub public: bool,
@@ -198,9 +195,8 @@ pub struct Field {
     pub provides: Option<String>,
     pub requires: Option<String>,
     pub is_ref: bool,
-    pub guard: Option<TokenStream>,
-    pub post_guard: Option<TokenStream>,
     pub features: Vec<String>,
+    //pub directives: Option<TokenStream>,
 }
 
 impl Field {
@@ -214,14 +210,10 @@ impl Field {
         let mut requires = None;
         let mut features = Vec::new();
         let mut is_ref = false;
-        let mut guard = None;
-        let mut post_guard = None;
 
         for attr in attrs {
             match attr.parse_meta()? {
                 Meta::List(ls) if ls.path.is_ident("field") => {
-                    guard = parse_guards(crate_name, &ls)?;
-                    post_guard = parse_post_guards(crate_name, &ls)?;
                     for meta in &ls.nested {
                         match meta {
                             NestedMeta::Meta(Meta::Path(p)) if p.is_ident("skip") => {
@@ -321,8 +313,6 @@ impl Field {
             provides,
             requires,
             is_ref,
-            guard,
-            post_guard,
             features,
         }))
     }
@@ -929,7 +919,6 @@ pub struct Directive {
     pub internal: bool,
     pub name: Option<String>,
     pub desc: Option<String>,
-    pub locations: Vec<Path>,
 }
 
 impl Directive {
@@ -937,20 +926,12 @@ impl Directive {
         let mut internal = false;
         let mut name = None;
         let mut desc = None;
-        let mut locations = Vec::new();
 
         for arg in args {
             match arg {
                 NestedMeta::Meta(Meta::Path(p)) => {
                     if p.is_ident("internal") {
                         internal = true;
-                    }
-                }
-                NestedMeta::Meta(Meta::List(ls)) if ls.path.is_ident("locations") => {
-                    for item in ls.nested {
-                        if let NestedMeta::Meta(Meta::Path(p)) = item {
-                            locations.push(p);
-                        }
                     }
                 }
                 NestedMeta::Meta(Meta::NameValue(nv)) => {
@@ -982,7 +963,6 @@ impl Directive {
             internal,
             name,
             desc,
-            locations,
         })
     }
 }

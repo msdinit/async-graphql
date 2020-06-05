@@ -121,7 +121,6 @@ mod types;
 mod validation;
 
 pub mod extensions;
-pub mod guard;
 pub mod validators;
 
 #[doc(hidden)]
@@ -175,7 +174,11 @@ pub mod directives;
 #[doc(hidden)]
 pub mod registry;
 #[doc(hidden)]
-pub use base::{BoxFieldFuture, InputObjectType, InputValueType, ObjectType, OutputValueType};
+pub use base::{
+    BoxFieldFuture, Directive, InputObjectType, InputValueType, ObjectType, OutputValueType,
+};
+#[doc(hidden)]
+pub use model::__DirectiveLocation;
 #[doc(hidden)]
 pub use resolver::{collect_fields, do_resolve};
 #[doc(hidden)]
@@ -205,7 +208,6 @@ pub use types::{EnumItem, EnumType};
 /// | external      | Mark a field as owned by another service. This allows service A to use fields from service B while also knowing at runtime the types of that field. | bool | Y |
 /// | provides      | Annotate the expected returned fieldset from a field on a base type that is guaranteed to be selectable by the gateway. | string | Y |
 /// | requires      | Annotate the required input fieldset from a base type for a resolver. It is used to develop a query plan where the required fields may not be needed by the client, but the service may need additional information from other services. | string | Y |
-/// | guard         | Field of guard            | [`Guard`](guard/trait.Guard.html) | Y        |
 /// | feature       | It's like a `#[cfg(feature = "foo")]` attribute but instead of not compiling this field it will just return a proper `FieldError` to tell you this feature is not enabled | string ("feature1,feature2") | Y |
 ///
 /// # Field argument parameters
@@ -314,7 +316,6 @@ pub use async_graphql_derive::Object;
 /// | external      | Mark a field as owned by another service. This allows service A to use fields from service B while also knowing at runtime the types of that field. | bool | Y |
 /// | provides      | Annotate the expected returned fieldset from a field on a base type that is guaranteed to be selectable by the gateway. | string | Y |
 /// | requires      | Annotate the required input fieldset from a base type for a resolver. It is used to develop a query plan where the required fields may not be needed by the client, but the service may need additional information from other services. | string | Y |
-/// | guard         | Field of guard            | [`Guard`](guard/trait.Guard.html) | Y        |
 /// | feature       | It's like a `#[cfg(feature = "foo")]` attribute but instead of not compiling this field it will just return a proper `FieldError` to tell you this feature is not enabled | string ("feature1,feature2") | Y |
 ///
 /// # Examples
@@ -658,7 +659,6 @@ pub use async_graphql_derive::Union;
 /// | name        | Field name                | string   | Y        |
 /// | desc        | Field description         | string   | Y        |
 /// | deprecation | Field deprecation reason  | string   | Y        |
-/// | guard         | Field of guard            | [`Guard`](guard/trait.Guard.html) | Y        |
 /// | feature       | It's like a `#[cfg(feature = "foo")]` attribute but instead of not compiling this field it will just return a proper `FieldError` to tell you this feature is not enabled | string ("feature1,feature2") | Y |
 ///
 /// # Field argument parameters

@@ -1,8 +1,6 @@
 use crate::args;
 use crate::output_type::OutputType;
-use crate::utils::{
-    check_reserved_name, feature_block, get_crate_name, get_param_getter_ident, get_rustdoc,
-};
+use crate::utils::{check_reserved_name, feature_block, get_crate_name, get_rustdoc};
 use inflector::Inflector;
 use proc_macro::TokenStream;
 use quote::quote;
@@ -179,9 +177,7 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
                         Some(default) => quote! { Some(|| -> #ty { #default }) },
                         None => quote! { None },
                     };
-                    let param_getter_name = get_param_getter_ident(&ident.ident.to_string());
                     get_params.push(quote! {
-                        let #param_getter_name = || -> #crate_name::Result<#ty> { ctx.param_value(#name, #default) };
                         let #ident: #ty = ctx.param_value(#name, #default)?;
                     });
                 }
@@ -238,22 +234,11 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
                         map_err(|err| err.into_error_with_path(ctx.position(), ctx.path_node.as_ref().unwrap().to_json()))?)
                 };
 
-                let guard = field.guard.map(|guard| quote! {
-                    #guard.check(ctx).await.map_err(|err| err.into_error_with_path(ctx.position(), ctx.path_node.as_ref().unwrap().to_json()))?;
-                });
-                if field.post_guard.is_some() {
-                    return Err(Error::new_spanned(
-                        method,
-                        "The subscription field does not support post guard",
-                    ));
-                }
-
                 create_stream.push(quote! {
                     if ctx.name.node == #field_name {
                         use #crate_name::futures::{StreamExt, TryStreamExt};
 
                         #(#get_params)*
-                        #guard
                         let field_name = std::sync::Arc::new(ctx.result_name().to_string());
                         let field = std::sync::Arc::new(ctx.item.clone());
 
