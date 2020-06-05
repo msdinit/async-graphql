@@ -158,8 +158,8 @@ pub fn Directive(args: TokenStream, input: TokenStream) -> TokenStream {
         Ok(directive_args) => directive_args,
         Err(err) => return err.to_compile_error().into(),
     };
-    let mut item_impl = parse_macro_input!(input as ItemImpl);
-    match directive::generate(&directive_args, &mut item_impl) {
+    let mut input = parse_macro_input!(input as DeriveInput);
+    match directive::generate(&directive_args, &mut input) {
         Ok(expanded) => expanded,
         Err(err) => err.to_compile_error().into(),
     }

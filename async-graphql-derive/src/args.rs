@@ -4,7 +4,7 @@ use crate::utils::{
 };
 use proc_macro2::TokenStream;
 use quote::quote;
-use syn::{Attribute, AttributeArgs, Error, Lit, Meta, MetaList, NestedMeta, Result, Type};
+use syn::{Attribute, AttributeArgs, Error, Lit, Meta, MetaList, NestedMeta, Path, Result, Type};
 
 pub struct CacheControl {
     pub public: bool,
@@ -929,6 +929,7 @@ pub struct Directive {
     pub internal: bool,
     pub name: Option<String>,
     pub desc: Option<String>,
+    pub locations: Vec<Path>,
 }
 
 impl Directive {
@@ -936,12 +937,20 @@ impl Directive {
         let mut internal = false;
         let mut name = None;
         let mut desc = None;
+        let mut locations = Vec::new();
 
         for arg in args {
             match arg {
                 NestedMeta::Meta(Meta::Path(p)) => {
                     if p.is_ident("internal") {
                         internal = true;
+                    }
+                }
+                NestedMeta::Meta(Meta::List(ls)) if ls.path.is_ident("locations") => {
+                    for item in ls.nested {
+                        if let NestedMeta::Meta(Meta::Path(p)) = item {
+                            locations.push(p);
+                        }
                     }
                 }
                 NestedMeta::Meta(Meta::NameValue(nv)) => {
@@ -973,6 +982,7 @@ impl Directive {
             internal,
             name,
             desc,
+            locations,
         })
     }
 }

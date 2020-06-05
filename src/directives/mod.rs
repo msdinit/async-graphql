@@ -3,7 +3,7 @@ use crate::FieldResult;
 
 #[async_trait::async_trait]
 #[allow(unused_variables)]
-pub trait DirectiveOnFieldDefinition {
+pub trait OnFieldDefinition {
     async fn before_field_resolve(&self, ctx: &ContextDirective<'_>) -> FieldResult<()> {
         Ok(())
     }

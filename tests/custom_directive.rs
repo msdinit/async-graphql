@@ -1,3 +1,4 @@
+use async_graphql::directives::*;
 use async_graphql::*;
 
 #[async_std::test]
@@ -9,17 +10,14 @@ pub async fn test_custom_directive() {
         Admin,
     }
 
+    // #[Directive]
     struct Auth {
         role: Role,
     }
 
-    #[Directive]
-    impl Auth {
-        async fn before_field_resolve(
-            &self,
-            ctx: &ContextDirective<'_>,
-            role: Role,
-        ) -> FieldResult<()> {
+    #[async_trait::async_trait]
+    impl OnFieldDefinition for Auth {
+        async fn before_field_resolve(&self, ctx: &ContextDirective<'_>) -> FieldResult<()> {
             if let Some(role) = ctx.data_opt::<Role>() {
                 if *role == self.role {
                     return Ok(());

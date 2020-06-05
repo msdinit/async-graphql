@@ -108,7 +108,6 @@ extern crate log;
 
 mod base;
 mod context;
-mod directives;
 mod error;
 mod look_ahead;
 mod model;
