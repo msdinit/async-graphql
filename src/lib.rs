@@ -172,6 +172,8 @@ pub type Result<T> = std::result::Result<T, Error>;
 #[doc(hidden)]
 pub use context::{ContextDirective, ContextSelectionSet};
 #[doc(hidden)]
+pub mod directives;
+#[doc(hidden)]
 pub mod registry;
 #[doc(hidden)]
 pub use base::{BoxFieldFuture, InputObjectType, InputValueType, ObjectType, OutputValueType};
@@ -704,3 +706,14 @@ pub use async_graphql_derive::DataSource;
 /// | desc        | Scalar description        | string   | Y        |
 ///
 pub use async_graphql_derive::Scalar;
+
+/// Define a Schema directive
+///
+/// # Macro parameters
+///
+/// | Attribute   | description               | Type     | Optional |
+/// |-------------|---------------------------|----------|----------|
+/// | name        | Scalar name               | string   | Y        |
+/// | desc        | Scalar description        | string   | Y        |
+///
+pub use async_graphql_derive::Directive;

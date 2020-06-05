@@ -11,8 +11,8 @@ pub trait DirectiveOnFieldDefinition {
     async fn after_field_resolve<T: Send>(
         &self,
         ctx: &ContextDirective<'_>,
-        result: T,
-    ) -> FieldResult<T> {
-        Ok(result)
+        result: &mut T,
+    ) -> FieldResult<()> {
+        Ok(())
     }
 }

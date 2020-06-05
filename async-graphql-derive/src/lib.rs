@@ -4,6 +4,7 @@
 extern crate proc_macro;
 
 mod args;
+mod directive;
 mod r#enum;
 mod input_object;
 mod interface;
@@ -145,6 +146,20 @@ pub fn Scalar(args: TokenStream, input: TokenStream) -> TokenStream {
     };
     let mut item_impl = parse_macro_input!(input as ItemImpl);
     match scalar::generate(&scalar_args, &mut item_impl) {
+        Ok(expanded) => expanded,
+        Err(err) => err.to_compile_error().into(),
+    }
+}
+
+#[proc_macro_attribute]
+#[allow(non_snake_case)]
+pub fn Directive(args: TokenStream, input: TokenStream) -> TokenStream {
+    let directive_args = match args::Directive::parse(parse_macro_input!(args as AttributeArgs)) {
+        Ok(directive_args) => directive_args,
+        Err(err) => return err.to_compile_error().into(),
+    };
+    let mut item_impl = parse_macro_input!(input as ItemImpl);
+    match directive::generate(&directive_args, &mut item_impl) {
         Ok(expanded) => expanded,
         Err(err) => err.to_compile_error().into(),
     }
