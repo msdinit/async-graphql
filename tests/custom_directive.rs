@@ -16,7 +16,7 @@ pub async fn test_custom_directive() {
     }
 
     #[async_trait::async_trait]
-    impl OnFieldDefinition for Auth {
+    impl<T: Sync + Send + 'static> OnFieldDefinition<T> for Auth {
         async fn before_field_resolve(&self, ctx: &ContextDirective<'_>) -> FieldResult<()> {
             if let Some(role) = ctx.data_opt::<Role>() {
                 if *role == self.role {
