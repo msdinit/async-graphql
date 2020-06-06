@@ -237,7 +237,7 @@ pub struct InlineFragment {
 }
 
 fn get_argument<'a>(
-    arguments: &'a Vec<(Positioned<String>, Positioned<Value>)>,
+    arguments: &'a [(Positioned<String>, Positioned<Value>)],
     name: &str,
 ) -> Option<&'a Positioned<Value>> {
     arguments

@@ -42,16 +42,6 @@ impl<'a> Visitor<'a> for ArgumentsOfCorrectType<'a> {
             .current_args
             .and_then(|args| args.get(name.as_str()).map(|input| input))
         {
-            if let Some(validator) = &arg.validator {
-                if let Some(reason) = validator.is_valid(value) {
-                    ctx.report_error(
-                        vec![name.position()],
-                        format!("Invalid value for argument \"{}\", {}", arg.name, reason),
-                    );
-                    return;
-                }
-            }
-
             if let Some(reason) = is_valid_input_value(
                 ctx.registry,
                 &arg.ty,

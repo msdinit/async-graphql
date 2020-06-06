@@ -121,7 +121,6 @@ mod types;
 mod validation;
 
 pub mod extensions;
-pub mod validators;
 
 #[doc(hidden)]
 pub use async_graphql_parser as parser;
@@ -168,7 +167,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 // internal types
 #[doc(hidden)]
-pub use context::{ContextDirective, ContextSelectionSet};
+pub use context::ContextSelectionSet;
 #[doc(hidden)]
 pub mod directives;
 #[doc(hidden)]

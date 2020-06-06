@@ -1,7 +1,7 @@
-use crate::utils::{get_rustdoc, parse_default, parse_default_with, parse_validator};
+use crate::utils::{get_rustdoc, parse_default, parse_default_with, parse_directives};
 use proc_macro2::TokenStream;
 use quote::quote;
-use syn::{Attribute, AttributeArgs, Error, Lit, Meta, MetaList, NestedMeta, Result, Type};
+use syn::{Attribute, AttributeArgs, Error, Lit, Meta, MetaList, NestedMeta, Path, Result, Type};
 
 pub struct CacheControl {
     pub public: bool,
@@ -126,15 +126,13 @@ pub struct Argument {
     pub name: Option<String>,
     pub desc: Option<String>,
     pub default: Option<TokenStream>,
-    pub validator: TokenStream,
 }
 
 impl Argument {
-    pub fn parse(crate_name: &TokenStream, attrs: &[Attribute]) -> Result<Self> {
+    pub fn parse(attrs: &[Attribute]) -> Result<Self> {
         let mut name = None;
         let mut desc = None;
         let mut default = None;
-        let mut validator = quote! { None };
 
         for attr in attrs {
             match attr.parse_meta()? {
@@ -170,8 +168,6 @@ impl Argument {
                             }
                         }
                     }
-
-                    validator = parse_validator(crate_name, &ls)?;
                 }
                 _ => {}
             }
@@ -181,7 +177,6 @@ impl Argument {
             name,
             desc,
             default,
-            validator,
         })
     }
 }
@@ -196,11 +191,11 @@ pub struct Field {
     pub requires: Option<String>,
     pub is_ref: bool,
     pub features: Vec<String>,
-    //pub directives: Option<TokenStream>,
+    pub directives: Vec<(Path, TokenStream)>,
 }
 
 impl Field {
-    pub fn parse(crate_name: &TokenStream, attrs: &[Attribute]) -> Result<Option<Self>> {
+    pub fn parse(attrs: &[Attribute]) -> Result<Option<Self>> {
         let mut name = None;
         let mut desc = None;
         let mut deprecation = None;
@@ -210,6 +205,7 @@ impl Field {
         let mut requires = None;
         let mut features = Vec::new();
         let mut is_ref = false;
+        let mut directives = Vec::new();
 
         for attr in attrs {
             match attr.parse_meta()? {
@@ -290,6 +286,8 @@ impl Field {
                             NestedMeta::Meta(Meta::List(ls)) => {
                                 if ls.path.is_ident("cache_control") {
                                     cache_control = CacheControl::parse(ls)?;
+                                } else if ls.path.is_ident("directive") {
+                                    directives.extend(parse_directives(ls)?);
                                 }
                             }
                             _ => {}
@@ -314,6 +312,7 @@ impl Field {
             requires,
             is_ref,
             features,
+            directives,
         }))
     }
 }
@@ -435,15 +434,13 @@ pub struct InputField {
     pub name: Option<String>,
     pub desc: Option<String>,
     pub default: Option<TokenStream>,
-    pub validator: TokenStream,
 }
 
 impl InputField {
-    pub fn parse(crate_name: &TokenStream, attrs: &[Attribute]) -> Result<Self> {
+    pub fn parse(attrs: &[Attribute]) -> Result<Self> {
         let mut name = None;
         let mut desc = None;
         let mut default = None;
-        let mut validator = quote! { None };
 
         for attr in attrs {
             if attr.path.is_ident("field") {
@@ -487,8 +484,6 @@ impl InputField {
                             _ => {}
                         }
                     }
-
-                    validator = parse_validator(crate_name, &args)?;
                 }
             }
         }
@@ -501,7 +496,6 @@ impl InputField {
             name,
             desc,
             default,
-            validator,
         })
     }
 }

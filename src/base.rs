@@ -1,7 +1,7 @@
 use crate::registry::Registry;
 use crate::{
-    registry, Context, ContextDirective, ContextSelectionSet, FieldResult, InputValueResult,
-    Positioned, QueryError, Result, Value, __DirectiveLocation,
+    registry, Context, ContextSelectionSet, FieldResult, InputValueResult, Positioned, QueryError,
+    Result, Value, __DirectiveLocation,
 };
 use async_graphql_parser::query::Field;
 use std::borrow::Cow;
@@ -247,9 +247,6 @@ impl<T: OutputValueType + Sync> OutputValueType for FieldResult<T> {
 /// Represents a GraphQL directive
 #[async_trait::async_trait]
 pub trait Directive: Sized {
-    /// Create directive
-    fn new(ctx: &ContextDirective<'_>) -> Result<Self>;
-
     /// Create type information in the registry.
     fn create_type_info(registry: &mut registry::Registry, location: __DirectiveLocation);
 }

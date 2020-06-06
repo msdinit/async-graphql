@@ -1,12 +1,10 @@
 use crate::parser::query::Type as ParsedType;
-use crate::validators::InputValueValidator;
 use crate::{model, Any, Type as _, Value, __DirectiveLocation};
 use indexmap::map::IndexMap;
 use indexmap::set::IndexSet;
 use itertools::Itertools;
 use std::collections::{HashMap, HashSet};
 use std::fmt::Write;
-use std::sync::Arc;
 
 fn parse_non_null(type_name: &str) -> Option<&str> {
     if type_name.ends_with('!') {
@@ -98,7 +96,6 @@ pub struct MetaInputValue {
     pub description: Option<&'static str>,
     pub ty: String,
     pub default_value: Option<String>,
-    pub validator: Option<Arc<dyn InputValueValidator>>,
 }
 
 #[derive(Clone)]
@@ -687,7 +684,6 @@ impl Registry {
                                 description: None,
                                 ty: "[_Any!]!".to_string(),
                                 default_value: None,
-                                validator: None,
                             },
                         );
                         args

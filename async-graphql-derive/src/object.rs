@@ -1,10 +1,13 @@
 use crate::args;
 use crate::output_type::OutputType;
-use crate::utils::{check_reserved_name, feature_block, get_crate_name, get_rustdoc};
+use crate::utils::{check_reserved_name, feature_block, get_crate_name, get_rustdoc, remove_attr};
 use inflector::Inflector;
 use proc_macro::TokenStream;
+use proc_macro2::Span;
 use quote::quote;
-use syn::{Block, Error, FnArg, ImplItem, ItemImpl, Pat, Result, ReturnType, Type, TypeReference};
+use syn::{
+    Block, Error, FnArg, Ident, ImplItem, ItemImpl, Pat, Result, ReturnType, Type, TypeReference,
+};
 
 pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<TokenStream> {
     let crate_name = get_crate_name(object_args.internal);
@@ -79,7 +82,7 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
                                 args.push((
                                     arg_ident.clone(),
                                     arg_ty.clone(),
-                                    args::Argument::parse(&crate_name, &pat.attrs)?,
+                                    args::Argument::parse(&pat.attrs)?,
                                 ));
                                 pat.attrs.clear();
                             }
@@ -171,16 +174,8 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
                     },
                 ));
 
-                method.attrs.remove(
-                    method
-                        .attrs
-                        .iter()
-                        .enumerate()
-                        .find(|(_, a)| a.path.is_ident("entity"))
-                        .map(|(idx, _)| idx)
-                        .unwrap(),
-                );
-            } else if let Some(field) = args::Field::parse(&crate_name, &method.attrs)? {
+                remove_attr(&mut method.attrs, "entity");
+            } else if let Some(field) = args::Field::parse(&method.attrs)? {
                 if method.sig.asyncness.is_none() {
                     return Err(Error::new_spanned(&method, "Must be asynchronous"));
                 }
@@ -250,7 +245,7 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
                                 args.push((
                                     arg_ident.clone(),
                                     arg_ty.clone(),
-                                    args::Argument::parse(&crate_name, &pat.attrs)?,
+                                    args::Argument::parse(&pat.attrs)?,
                                 ));
                                 pat.attrs.clear();
                             }
@@ -290,7 +285,6 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
                         name,
                         desc,
                         default,
-                        validator,
                     },
                 ) in args
                 {
@@ -314,7 +308,6 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
                             description: #desc,
                             ty: <#ty as #crate_name::Type>::create_type_info(registry),
                             default_value: #schema_default,
-                            validator: #validator,
                         });
                     });
 
@@ -330,8 +323,16 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
                 }
 
                 let schema_ty = ty.value_type();
+                let mut register_directives = Vec::new();
+
+                for (ty, _) in &field.directives {
+                    register_directives.push(quote! {
+                        #ty::create_type_info(registry, #crate_name::__DirectiveLocation::FIELD_DEFINITION);
+                    });
+                }
 
                 schema_fields.push(quote! {
+                    #(#register_directives)*
                     fields.insert(#field_name.to_string(), #crate_name::registry::MetaField {
                         name: #field_name.to_string(),
                         description: #field_desc,
@@ -379,31 +380,34 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
                     }
                 };
 
+                let mut directives_create = Vec::new();
+                let mut directives_before_call = Vec::new();
+                let mut directives_after_call = Vec::new();
+                for (idx, (ty, params)) in field.directives.iter().enumerate() {
+                    let ident = Ident::new(&format!("__directive_{}", idx), Span::call_site());
+                    directives_create.push(quote! { let #ident = #ty { #params }; });
+                    directives_before_call.push(quote! { #crate_name::directives::OnFieldDefinition::<#schema_ty>::before_field_resolve(&#ident, ctx).await.map_err(|err| err.into_error_with_path(ctx.position(), ctx.path_node.as_ref().unwrap().to_json()))?; });
+                    directives_after_call.push(quote! { #crate_name::directives::OnFieldDefinition::after_field_resolve(&#ident, ctx, &mut res).await.map_err(|err| err.into_error_with_path(ctx.position(), ctx.path_node.as_ref().unwrap().to_json()))?; });
+                }
+
                 resolvers.push(quote! {
                     if ctx.name.node == #field_name {
                         use #crate_name::OutputValueType;
+                        #(#directives_create)*
+                        #(#directives_before_call)*
                         #(#get_params)*
+                        #[allow(unused_mut)]
+                        let mut res = #resolve_obj;
+                        #(#directives_after_call)*
                         let ctx_obj = ctx.with_selection_set(&ctx.selection_set);
-                        let res = #resolve_obj;
                         return OutputValueType::resolve(&res, &ctx_obj, ctx.item).await;
                     }
                 });
 
-                if let Some((idx, _)) = method
-                    .attrs
-                    .iter()
-                    .enumerate()
-                    .find(|(_, a)| a.path.is_ident("field"))
-                {
-                    method.attrs.remove(idx);
-                }
-            } else if let Some((idx, _)) = method
-                .attrs
-                .iter()
-                .enumerate()
-                .find(|(_, a)| a.path.is_ident("field"))
-            {
-                method.attrs.remove(idx);
+                remove_attr(&mut method.attrs, "field");
+                remove_attr(&mut method.attrs, "directive");
+            } else {
+                remove_attr(&mut method.attrs, "field");
             }
         }
     }
@@ -482,5 +486,8 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
             }
         }
     };
+    if gql_typename == "Query11" {
+        println!("{}", expanded);
+    }
     Ok(expanded.into())
 }

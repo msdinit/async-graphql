@@ -33,13 +33,11 @@ pub fn generate(directive_args: &args::Directive, input: &mut DeriveInput) -> Re
     };
 
     let mut schema_args = Vec::new();
-    let mut get_args = Vec::new();
 
     if let Some(fields) = fields {
         for item in &mut fields.named {
-            let name = &item.ident;
             let ty = &item.ty;
-            let arg = args::Argument::parse(&crate_name, &item.attrs)?;
+            let arg = args::Argument::parse(&item.attrs)?;
             let arg_name = arg
                 .name
                 .clone()
@@ -62,16 +60,7 @@ pub fn generate(directive_args: &args::Directive, input: &mut DeriveInput) -> Re
                     description: #arg_desc,
                     ty: <#ty as #crate_name::Type>::create_type_info(registry),
                     default_value: #schema_default,
-                    validator: None,
                 });
-            });
-
-            let default = match arg.default {
-                Some(default) => quote! { Some(|| -> #ty { #default }) },
-                None => quote! { None },
-            };
-            get_args.push(quote! {
-                #name: ctx.param_value(#arg_name, #default)?
             });
         }
     }
@@ -80,12 +69,6 @@ pub fn generate(directive_args: &args::Directive, input: &mut DeriveInput) -> Re
         #input
 
         impl #crate_name::Directive for #ident {
-            fn new(ctx: &#crate_name::ContextDirective<'_>) -> #crate_name::Result<Self> {
-                Ok(Self {
-                    #(#get_args),*
-                })
-            }
-
             fn create_type_info(registry: &mut #crate_name::registry::Registry, location: #crate_name::__DirectiveLocation) {
                 let directive = #crate_name::registry::MetaDirective {
                     name: #gql_typename,
@@ -101,6 +84,5 @@ pub fn generate(directive_args: &args::Directive, input: &mut DeriveInput) -> Re
             }
         }
     };
-    println!("{}", expanded);
     Ok(expanded.into())
 }

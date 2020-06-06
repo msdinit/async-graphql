@@ -1,5 +1,5 @@
 use crate::args;
-use crate::utils::{check_reserved_name, feature_block, get_crate_name, get_rustdoc};
+use crate::utils::{check_reserved_name, feature_block, get_crate_name, get_rustdoc, remove_attr};
 use inflector::Inflector;
 use proc_macro::TokenStream;
 use quote::quote;
@@ -39,7 +39,7 @@ pub fn generate(object_args: &args::Object, input: &mut DeriveInput) -> Result<T
 
     if let Some(fields) = fields {
         for item in &mut fields.named {
-            if let Some(field) = args::Field::parse(&crate_name, &item.attrs)? {
+            if let Some(field) = args::Field::parse(&item.attrs)? {
                 let field_name = field
                     .name
                     .clone()
@@ -133,14 +133,7 @@ pub fn generate(object_args: &args::Object, input: &mut DeriveInput) -> Result<T
                 });
             }
 
-            if let Some((idx, _)) = item
-                .attrs
-                .iter()
-                .enumerate()
-                .find(|(_, a)| a.path.is_ident("field"))
-            {
-                item.attrs.remove(idx);
-            }
+            remove_attr(&mut item.attrs, "field");
         }
     }
 

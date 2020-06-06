@@ -1,6 +1,6 @@
 use crate::args;
 use crate::output_type::OutputType;
-use crate::utils::{check_reserved_name, feature_block, get_crate_name, get_rustdoc};
+use crate::utils::{check_reserved_name, feature_block, get_crate_name, get_rustdoc, remove_attr};
 use inflector::Inflector;
 use proc_macro::TokenStream;
 use quote::quote;
@@ -43,7 +43,7 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
 
     for item in &mut item_impl.items {
         if let ImplItem::Method(method) = item {
-            if let Some(field) = args::Field::parse(&crate_name, &method.attrs)? {
+            if let Some(field) = args::Field::parse(&method.attrs)? {
                 let ident = &method.sig.ident;
                 let field_name = field
                     .name
@@ -99,7 +99,7 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
                                 args.push((
                                     arg_ident.clone(),
                                     arg_ty.clone(),
-                                    args::Argument::parse(&crate_name, &pat.attrs)?,
+                                    args::Argument::parse(&pat.attrs)?,
                                 ));
                                 pat.attrs.clear();
                             }
@@ -143,7 +143,6 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
                         name,
                         desc,
                         default,
-                        validator,
                     },
                 ) in args
                 {
@@ -167,7 +166,6 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
                             description: #desc,
                             ty: <#ty as #crate_name::Type>::create_type_info(registry),
                             default_value: #schema_default,
-                            validator: #validator,
                         });
                     });
 
@@ -283,14 +281,7 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
                 });
             }
 
-            if let Some((idx, _)) = method
-                .attrs
-                .iter()
-                .enumerate()
-                .find(|(_, a)| a.path.is_ident("field"))
-            {
-                method.attrs.remove(idx);
-            }
+            remove_attr(&mut method.attrs, "field");
         }
     }
 

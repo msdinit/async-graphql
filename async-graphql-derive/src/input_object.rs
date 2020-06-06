@@ -56,10 +56,9 @@ pub fn generate(object_args: &args::InputObject, input: &DeriveInput) -> Result<
     let mut schema_fields = Vec::new();
 
     for field in &s.fields {
-        let field_args = args::InputField::parse(&crate_name, &field.attrs)?;
+        let field_args = args::InputField::parse(&field.attrs)?;
         let ident = field.ident.as_ref().unwrap();
         let ty = &field.ty;
-        let validator = &field_args.validator;
         let name = field_args
             .name
             .unwrap_or_else(|| ident.to_string().to_camel_case());
@@ -102,7 +101,6 @@ pub fn generate(object_args: &args::InputObject, input: &DeriveInput) -> Result<
                 description: #desc,
                 ty: <#ty as #crate_name::Type>::create_type_info(registry),
                 default_value: #schema_default,
-                validator: #validator,
             });
         })
     }

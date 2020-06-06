@@ -129,9 +129,6 @@ impl Data {
 /// Context for `SelectionSet`
 pub type ContextSelectionSet<'a> = ContextBase<'a, &'a Positioned<SelectionSet>>;
 
-/// Context for `Directive`
-pub type ContextDirective<'a> = ContextBase<'a, &'a Positioned<Directive>>;
-
 /// Context object for resolve field
 pub type Context<'a> = ContextBase<'a, &'a Positioned<Field>>;
 
@@ -351,10 +348,7 @@ impl<'a, T> ContextBase<'a, T> {
     }
 
     #[doc(hidden)]
-    pub fn with_field(
-        &'a self,
-        field: &'a Positioned<Field>,
-    ) -> ContextBase<'a, &'a Positioned<Field>> {
+    pub fn with_field(&'a self, field: &'a Positioned<Field>) -> Context<'a> {
         ContextBase {
             path_node: Some(QueryPathNode {
                 parent: self.path_node.as_ref(),
@@ -379,7 +373,7 @@ impl<'a, T> ContextBase<'a, T> {
     pub fn with_selection_set(
         &self,
         selection_set: &'a Positioned<SelectionSet>,
-    ) -> ContextBase<'a, &'a Positioned<SelectionSet>> {
+    ) -> ContextSelectionSet<'a> {
         ContextBase {
             path_node: self.path_node.clone(),
             item: selection_set,
@@ -545,7 +539,7 @@ impl<'a, T> ContextBase<'a, T> {
 
 impl<'a> ContextBase<'a, &'a Positioned<SelectionSet>> {
     #[doc(hidden)]
-    pub fn with_index(&'a self, idx: usize) -> ContextBase<'a, &'a Positioned<SelectionSet>> {
+    pub fn with_index(&'a self, idx: usize) -> ContextSelectionSet<'a> {
         ContextBase {
             path_node: Some(QueryPathNode {
                 parent: self.path_node.as_ref(),

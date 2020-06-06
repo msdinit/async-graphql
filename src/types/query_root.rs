@@ -60,7 +60,6 @@ impl<T: Type> Type for QueryRoot<T> {
                                 description: None,
                                 ty: "String!".to_string(),
                                 default_value: None,
-                                validator: None,
                             },
                         );
                         args

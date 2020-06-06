@@ -135,18 +135,6 @@ pub fn is_valid_input_value(
                             for field in input_fields.values() {
                                 input_names.remove(field.name);
                                 if let Some(value) = values.get(field.name) {
-                                    if let Some(validator) = &field.validator {
-                                        if let Some(reason) = validator.is_valid(value) {
-                                            return Some(valid_error(
-                                                &QueryPathNode {
-                                                    parent: Some(&path_node),
-                                                    segment: QueryPathSegment::Name(field.name),
-                                                },
-                                                reason,
-                                            ));
-                                        }
-                                    }
-
                                     if let Some(reason) = is_valid_input_value(
                                         registry,
                                         &field.ty,
