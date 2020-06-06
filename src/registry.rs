@@ -1,5 +1,5 @@
 use crate::parser::query::Type as ParsedType;
-use crate::{model, Any, Type as _, Value, __DirectiveLocation};
+use crate::{model, Any, Type as _, Value};
 use indexmap::map::IndexMap;
 use indexmap::set::IndexSet;
 use itertools::Itertools;
@@ -365,22 +365,6 @@ impl Registry {
             self.types.insert(name.to_string(), ty);
         }
         T::qualified_type_name()
-    }
-
-    pub fn create_directive(
-        &mut self,
-        mut directive: MetaDirective,
-        location: __DirectiveLocation,
-    ) {
-        if let Some(directive) = self.directives.get_mut(directive.name) {
-            if !directive.locations.contains(&location) {
-                directive.locations.push(location);
-            }
-        } else {
-            directive.locations.push(location);
-            self.directives
-                .insert(directive.name.to_string(), directive);
-        }
     }
 
     pub fn add_directive(&mut self, directive: MetaDirective) {

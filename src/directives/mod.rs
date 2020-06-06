@@ -1,17 +1,16 @@
-use crate::{Context, Directive, FieldResult};
+use crate::{Context, FieldResult, InputValueResult, InputValueType};
 
 #[async_trait::async_trait]
 #[allow(unused_variables)]
-pub trait OnFieldDefinition<T: Sync + Send + 'static>: Directive {
+pub trait OnFieldDefinition {
     async fn before_field_resolve(&self, ctx: &Context<'_>) -> FieldResult<()> {
         Ok(())
     }
+}
 
-    async fn after_field_resolve(
-        &self,
-        ctx: &Context<'_>,
-        result: &mut T,
-    ) -> FieldResult<()> {
-        Ok(())
+#[allow(unused_variables)]
+pub trait OnInputValue<'a, T: InputValueType + Sync + Send + 'a> {
+    fn input_value(&'a self, value: T) -> InputValueResult<T> {
+        Ok(value)
     }
 }

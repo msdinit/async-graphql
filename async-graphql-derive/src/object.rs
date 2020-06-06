@@ -1,13 +1,13 @@
 use crate::args;
 use crate::output_type::OutputType;
-use crate::utils::{check_reserved_name, feature_block, get_crate_name, get_rustdoc, remove_attr};
+use crate::utils::{
+    check_reserved_name, feature_block, generate_arg_directives, generate_field_directives,
+    get_crate_name, get_rustdoc, remove_attr,
+};
 use inflector::Inflector;
 use proc_macro::TokenStream;
-use proc_macro2::Span;
 use quote::quote;
-use syn::{
-    Block, Error, FnArg, Ident, ImplItem, ItemImpl, Pat, Result, ReturnType, Type, TypeReference,
-};
+use syn::{Block, Error, FnArg, ImplItem, ItemImpl, Pat, Result, ReturnType, Type, TypeReference};
 
 pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<TokenStream> {
     let crate_name = get_crate_name(object_args.internal);
@@ -285,6 +285,7 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
                         name,
                         desc,
                         default,
+                        directives,
                     },
                 ) in args
                 {
@@ -317,22 +318,21 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
                         Some(default) => quote! { Some(|| -> #ty { #default }) },
                         None => quote! { None },
                     };
+                    let (directives_create, directives_call) =
+                        generate_arg_directives(&crate_name, &directives, quote! { #ty });
                     get_params.push(quote! {
-                        let #ident: #ty = ctx.param_value(#name, #default)?;
+                        let #ident: #ty = {
+                            let (pos, value) = ctx.param_value_and_pos(#name, #default)?;
+                            #directives_create
+                            #directives_call
+                            value
+                        };
                     });
                 }
 
                 let schema_ty = ty.value_type();
-                let mut register_directives = Vec::new();
-
-                for (ty, _) in &field.directives {
-                    register_directives.push(quote! {
-                        #ty::create_type_info(registry, #crate_name::__DirectiveLocation::FIELD_DEFINITION);
-                    });
-                }
 
                 schema_fields.push(quote! {
-                    #(#register_directives)*
                     fields.insert(#field_name.to_string(), #crate_name::registry::MetaField {
                         name: #field_name.to_string(),
                         description: #field_desc,
@@ -380,32 +380,23 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
                     }
                 };
 
-                let mut directives_create = Vec::new();
-                let mut directives_before_call = Vec::new();
-                let mut directives_after_call = Vec::new();
-                for (idx, (ty, params)) in field.directives.iter().enumerate() {
-                    let ident = Ident::new(&format!("__directive_{}", idx), Span::call_site());
-                    directives_create.push(quote! { let #ident = #ty { #params }; });
-                    directives_before_call.push(quote! { #crate_name::directives::OnFieldDefinition::<#schema_ty>::before_field_resolve(&#ident, ctx).await.map_err(|err| err.into_error_with_path(ctx.position(), ctx.path_node.as_ref().unwrap().to_json()))?; });
-                    directives_after_call.push(quote! { #crate_name::directives::OnFieldDefinition::after_field_resolve(&#ident, ctx, &mut res).await.map_err(|err| err.into_error_with_path(ctx.position(), ctx.path_node.as_ref().unwrap().to_json()))?; });
-                }
+                let (directives_create, directives_before_call) =
+                    generate_field_directives(&crate_name, &field.directives);
 
                 resolvers.push(quote! {
                     if ctx.name.node == #field_name {
                         use #crate_name::OutputValueType;
-                        #(#directives_create)*
-                        #(#directives_before_call)*
+                        #directives_create
+                        #directives_before_call
                         #(#get_params)*
                         #[allow(unused_mut)]
                         let mut res = #resolve_obj;
-                        #(#directives_after_call)*
                         let ctx_obj = ctx.with_selection_set(&ctx.selection_set);
                         return OutputValueType::resolve(&res, &ctx_obj, ctx.item).await;
                     }
                 });
 
                 remove_attr(&mut method.attrs, "field");
-                remove_attr(&mut method.attrs, "directive");
             } else {
                 remove_attr(&mut method.attrs, "field");
             }
@@ -486,8 +477,5 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
             }
         }
     };
-    if gql_typename == "Query11" {
-        println!("{}", expanded);
-    }
     Ok(expanded.into())
 }

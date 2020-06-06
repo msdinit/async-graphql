@@ -511,16 +511,16 @@ impl<'a, T> ContextBase<'a, T> {
         &self,
         value: Option<Positioned<Value>>,
         default: Option<fn() -> I>,
-    ) -> Result<I> {
-        if let Some(default) = default {
-            if value.is_none() {
-                return Ok(default());
-            }
-        }
+    ) -> Result<(Pos, I)> {
         let pos = value
             .as_ref()
             .map(|value| value.position())
             .unwrap_or_default();
+        if let Some(default) = default {
+            if value.is_none() {
+                return Ok((pos, default()));
+            }
+        }
         let value = match value {
             Some(value) => {
                 let mut new_value = value.into_inner();
@@ -531,7 +531,7 @@ impl<'a, T> ContextBase<'a, T> {
         };
 
         match InputValueType::parse(value) {
-            Ok(res) => Ok(res),
+            Ok(res) => Ok((pos, res)),
             Err(err) => Err(err.into_error(pos, I::qualified_type_name())),
         }
     }
@@ -557,12 +557,21 @@ impl<'a> ContextBase<'a, &'a Positioned<SelectionSet>> {
 
 impl<'a> ContextBase<'a, &'a Positioned<Field>> {
     #[doc(hidden)]
+    pub fn param_value_and_pos<T: InputValueType>(
+        &self,
+        name: &str,
+        default: Option<fn() -> T>,
+    ) -> Result<(Pos, T)> {
+        self.get_param_value(self.get_argument(name).cloned(), default)
+    }
+
+    #[doc(hidden)]
     pub fn param_value<T: InputValueType>(
         &self,
         name: &str,
         default: Option<fn() -> T>,
     ) -> Result<T> {
-        self.get_param_value(self.get_argument(name).cloned(), default)
+        self.param_value_and_pos(name, default).map(|r| r.1)
     }
 
     #[doc(hidden)]
@@ -625,7 +634,7 @@ impl<'a> ContextBase<'a, &'a Positioned<Directive>> {
         &self,
         name: &str,
         default: Option<fn() -> T>,
-    ) -> Result<T> {
+    ) -> Result<(Pos, T)> {
         self.get_param_value(self.get_argument(name).cloned(), default)
     }
 }

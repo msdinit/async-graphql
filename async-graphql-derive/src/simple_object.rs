@@ -1,5 +1,8 @@
 use crate::args;
-use crate::utils::{check_reserved_name, feature_block, get_crate_name, get_rustdoc, remove_attr};
+use crate::utils::{
+    check_reserved_name, feature_block, generate_field_directives, get_crate_name, get_rustdoc,
+    remove_attr,
+};
 use inflector::Inflector;
 use proc_macro::TokenStream;
 use quote::quote;
@@ -124,8 +127,13 @@ pub fn generate(object_args: &args::Object, input: &mut DeriveInput) -> Result<T
                     }
                 });
 
+                let (directives_create, directives_before_call) =
+                    generate_field_directives(&crate_name, &field.directives);
+
                 resolvers.push(quote! {
                     if ctx.name.node == #field_name {
+                        #directives_create
+                        #directives_before_call
                         let res = self.#ident(ctx).await.map_err(|err| err.into_error_with_path(ctx.position(), ctx.path_node.as_ref().unwrap().to_json()))?;
                         let ctx_obj = ctx.with_selection_set(&ctx.selection_set);
                         return #crate_name::OutputValueType::resolve(&res, &ctx_obj, ctx.item).await;

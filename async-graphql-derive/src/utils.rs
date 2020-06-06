@@ -148,10 +148,68 @@ pub fn parse_directives(meta_list: &MetaList) -> Result<Vec<(Path, TokenStream)>
                 }
             }
             directives.push((ty, quote! { #(#params),* }));
+        } else if let NestedMeta::Meta(Meta::Path(p)) = meta {
+            let ty = p.clone();
+            directives.push((ty, quote! {}));
         } else {
             return Err(Error::new_spanned(meta, "Invalid directive."));
         }
     }
 
     Ok(directives)
+}
+
+pub fn generate_field_directives(
+    crate_name: &TokenStream,
+    directives: &[(Path, TokenStream)],
+) -> (TokenStream, TokenStream) {
+    let mut directives_create = Vec::new();
+    let mut directives_before_call = Vec::new();
+
+    for (idx, (ty, params)) in directives.iter().enumerate() {
+        let ident = Ident::new(&format!("__directive_{}", idx), Span::call_site());
+        directives_create.push(quote! { static #ident: #crate_name::once_cell::sync::Lazy<#ty> = #crate_name::once_cell::sync::Lazy::new(|| #ty { #params } ); });
+        directives_before_call.push(quote! { #crate_name::directives::OnFieldDefinition::before_field_resolve(&*#ident, ctx).await.map_err(|err| err.into_error_with_path(ctx.position(), ctx.path_node.as_ref().unwrap().to_json()))?; });
+    }
+    (
+        quote! {#(#directives_create)* },
+        quote! {#(#directives_before_call)* },
+    )
+}
+
+pub fn generate_arg_directives(
+    crate_name: &TokenStream,
+    directives: &[(Path, TokenStream)],
+    expected_type: TokenStream,
+) -> (TokenStream, TokenStream) {
+    let mut directives_create = Vec::new();
+    let mut directives_call = Vec::new();
+
+    for (idx, (ty, params)) in directives.iter().enumerate() {
+        let ident = Ident::new(&format!("__directive_{}", idx), Span::call_site());
+        directives_create.push(quote! { static #ident: #crate_name::once_cell::sync::Lazy<#ty> = #crate_name::once_cell::sync::Lazy::new(|| #ty { #params } ); });
+        directives_call.push(quote! { let value = #crate_name::directives::OnInputValue::input_value(&*#ident, value).map_err(|err| err.into_error(pos, #expected_type::qualified_type_name()))?; });
+    }
+    (
+        quote! {#(#directives_create)* },
+        quote! {#(#directives_call)* },
+    )
+}
+
+pub fn generate_input_object_directives(
+    crate_name: &TokenStream,
+    directives: &[(Path, TokenStream)],
+) -> (TokenStream, TokenStream) {
+    let mut directives_create = Vec::new();
+    let mut directives_call = Vec::new();
+
+    for (idx, (ty, params)) in directives.iter().enumerate() {
+        let ident = Ident::new(&format!("__directive_{}", idx), Span::call_site());
+        directives_create.push(quote! { static #ident: #crate_name::once_cell::sync::Lazy<#ty> = #crate_name::once_cell::sync::Lazy::new(|| #ty { #params } ); });
+        directives_call.push(quote! { let value = #crate_name::directives::OnInputValue::input_value(&*#ident, value)?; });
+    }
+    (
+        quote! {#(#directives_create)* },
+        quote! {#(#directives_call)* },
+    )
 }

@@ -1,6 +1,9 @@
 use crate::args;
 use crate::output_type::OutputType;
-use crate::utils::{check_reserved_name, feature_block, get_crate_name, get_rustdoc, remove_attr};
+use crate::utils::{
+    check_reserved_name, feature_block, generate_arg_directives, generate_field_directives,
+    get_crate_name, get_rustdoc, remove_attr,
+};
 use inflector::Inflector;
 use proc_macro::TokenStream;
 use quote::quote;
@@ -143,6 +146,7 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
                         name,
                         desc,
                         default,
+                        directives,
                     },
                 ) in args
                 {
@@ -175,8 +179,15 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
                         Some(default) => quote! { Some(|| -> #ty { #default }) },
                         None => quote! { None },
                     };
+                    let (directives_create, directives_call) =
+                        generate_arg_directives(&crate_name, &directives, quote! { #ty });
                     get_params.push(quote! {
-                        let #ident: #ty = ctx.param_value(#name, #default)?;
+                        let #ident: #ty = {
+                            let (pos, value) = ctx.param_value_and_pos(#name, #default)?;
+                            #directives_create
+                            #directives_call
+                            value
+                        };
                     });
                 }
 
@@ -232,9 +243,15 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
                         map_err(|err| err.into_error_with_path(ctx.position(), ctx.path_node.as_ref().unwrap().to_json()))?)
                 };
 
+                let (directives_create, directives_before_call) =
+                    generate_field_directives(&crate_name, &field.directives);
+
                 create_stream.push(quote! {
                     if ctx.name.node == #field_name {
                         use #crate_name::futures::{StreamExt, TryStreamExt};
+
+                        #directives_create
+                        #directives_before_call
 
                         #(#get_params)*
                         let field_name = std::sync::Arc::new(ctx.result_name().to_string());

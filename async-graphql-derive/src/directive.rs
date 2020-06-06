@@ -1,5 +1,5 @@
 use crate::args;
-use crate::utils::{check_reserved_name, get_crate_name, get_rustdoc};
+use crate::utils::get_crate_name;
 use inflector::Inflector;
 use proc_macro::TokenStream;
 use quote::quote;
@@ -7,20 +7,6 @@ use syn::{Data, DeriveInput, Error, Fields, Result};
 
 pub fn generate(directive_args: &args::Directive, input: &mut DeriveInput) -> Result<TokenStream> {
     let crate_name = get_crate_name(directive_args.internal);
-    let ident = &input.ident;
-    let gql_typename = directive_args
-        .name
-        .clone()
-        .unwrap_or_else(|| ident.to_string());
-    check_reserved_name(&gql_typename, directive_args.internal)?;
-
-    let desc = directive_args
-        .desc
-        .clone()
-        .or_else(|| get_rustdoc(&input.attrs).ok().flatten())
-        .map(|s| quote! { Some(#s) })
-        .unwrap_or_else(|| quote! {None});
-
     let s = match &mut input.data {
         Data::Struct(e) => e,
         _ => return Err(Error::new_spanned(input, "It should be a struct")),
@@ -67,22 +53,6 @@ pub fn generate(directive_args: &args::Directive, input: &mut DeriveInput) -> Re
 
     let expanded = quote! {
         #input
-
-        impl #crate_name::Directive for #ident {
-            fn create_type_info(registry: &mut #crate_name::registry::Registry, location: #crate_name::__DirectiveLocation) {
-                let directive = #crate_name::registry::MetaDirective {
-                    name: #gql_typename,
-                    description: #desc,
-                    locations: Vec::new(),
-                    args: {
-                        let mut args = #crate_name::indexmap::IndexMap::new();
-                        #(#schema_args)*
-                        args
-                    }
-                };
-                registry.create_directive(directive, location);
-            }
-        }
     };
     Ok(expanded.into())
 }

@@ -134,6 +134,8 @@ pub use futures;
 #[doc(hidden)]
 pub use indexmap;
 #[doc(hidden)]
+pub use once_cell;
+#[doc(hidden)]
 pub use serde_json;
 
 pub mod http;
@@ -173,11 +175,7 @@ pub mod directives;
 #[doc(hidden)]
 pub mod registry;
 #[doc(hidden)]
-pub use base::{
-    BoxFieldFuture, Directive, InputObjectType, InputValueType, ObjectType, OutputValueType,
-};
-#[doc(hidden)]
-pub use model::__DirectiveLocation;
+pub use base::{BoxFieldFuture, InputObjectType, InputValueType, ObjectType, OutputValueType};
 #[doc(hidden)]
 pub use resolver::{collect_fields, do_resolve};
 #[doc(hidden)]

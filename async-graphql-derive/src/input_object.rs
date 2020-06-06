@@ -1,5 +1,7 @@
 use crate::args;
-use crate::utils::{check_reserved_name, get_crate_name, get_rustdoc};
+use crate::utils::{
+    check_reserved_name, generate_input_object_directives, get_crate_name, get_rustdoc,
+};
 use inflector::Inflector;
 use proc_macro::TokenStream;
 use quote::quote;
@@ -75,18 +77,29 @@ pub fn generate(object_args: &args::InputObject, input: &DeriveInput) -> Result<
             })
             .unwrap_or_else(|| quote! {None});
 
+        let (directives_create, directives_call) =
+            generate_input_object_directives(&crate_name, &field_args.directives);
+
         if let Some(default) = &field_args.default {
             get_fields.push(quote! {
                 let #ident: #ty = {
-                    match obj.get(#name) {
+                    #directives_create
+                    let value = match obj.get(#name) {
                         Some(value) => #crate_name::InputValueType::parse(Some(value.clone()))?,
                         None => #default,
-                    }
+                    };
+                    #directives_call
+                    value
                 };
             });
         } else {
             get_fields.push(quote! {
-                let #ident:#ty = #crate_name::InputValueType::parse(obj.get(#name).cloned())?;
+                let #ident: #ty = {
+                    #directives_create
+                    let value = #crate_name::InputValueType::parse(obj.get(#name).cloned())?;
+                    #directives_call
+                    value
+                };
             });
         }
 
