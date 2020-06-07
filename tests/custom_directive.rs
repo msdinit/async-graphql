@@ -10,7 +10,6 @@ pub async fn test_custom_directive() {
         Admin,
     }
 
-    #[Directive]
     struct Auth {
         role: Role,
     }
@@ -27,7 +26,6 @@ pub async fn test_custom_directive() {
         }
     }
 
-    #[Directive]
     struct GTZero {}
 
     impl<'a> OnInputValue<'a, i32> for GTZero {

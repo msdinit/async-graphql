@@ -926,23 +926,3 @@ impl Entity {
         Ok(None)
     }
 }
-
-pub struct Directive {
-    pub internal: bool,
-}
-
-impl Directive {
-    pub fn parse(args: AttributeArgs) -> Result<Self> {
-        let mut internal = false;
-
-        for arg in args {
-            if let NestedMeta::Meta(Meta::Path(p)) = arg {
-                if p.is_ident("internal") {
-                    internal = true;
-                }
-            }
-        }
-
-        Ok(Self { internal })
-    }
-}

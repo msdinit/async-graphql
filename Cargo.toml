@@ -46,6 +46,7 @@ indexmap = "1.3.2"
 async-stream = "0.2.1"
 multer = "1.2.0"
 log = "0.4.8"
+num-traits = "0.2.11"
 bson = { version = "0.14.1", optional = true }
 uuid = { version = "0.8.1", features = ["v4"] }
 url = { version = "2.1.1", optional = true }
