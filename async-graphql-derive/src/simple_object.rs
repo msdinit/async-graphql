@@ -99,6 +99,11 @@ pub fn generate(object_args: &args::Object, input: &DeriveInput) -> Result<Token
                     .map(|guard| quote! { #guard.check(ctx, &res).await.map_err(|err| err.into_error_with_path(ctx.position(), ctx.path_node.as_ref().unwrap().to_json()))?; });
 
                 let features = &field.features;
+                let async_flag = if object_args.sync {
+                    quote! { }
+                } else {
+                    quote! { async }
+                };
                 getters.push(if field.is_ref {
                     let block = feature_block(
                         &crate_name,
@@ -109,7 +114,7 @@ pub fn generate(object_args: &args::Object, input: &DeriveInput) -> Result<Token
                     quote! {
                          #[inline]
                          #[allow(missing_docs)]
-                         #vis async fn #ident(&self, ctx: &#crate_name::Context<'_>) -> #crate_name::FieldResult<&#ty> {
+                         #vis #async_flag fn #ident(&self, ctx: &#crate_name::Context<'_>) -> #crate_name::FieldResult<&#ty> {
                              #block
                          }
                     }
@@ -123,16 +128,22 @@ pub fn generate(object_args: &args::Object, input: &DeriveInput) -> Result<Token
                     quote! {
                         #[inline]
                         #[allow(missing_docs)]
-                        #vis async fn #ident(&self, ctx: &#crate_name::Context<'_>) -> #crate_name::FieldResult<#ty> {
+                        #vis #async_flag fn #ident(&self, ctx: &#crate_name::Context<'_>) -> #crate_name::FieldResult<#ty> {
                             #block
                         }
                     }
                 });
 
+                let get_value = if object_args.sync {
+                    quote!{ self.#ident(ctx) }
+                } else {
+                    quote!{ self.#ident(ctx).await }
+                };
+
                 resolvers.push(quote! {
                     if ctx.name.node == #field_name {
                         #guard
-                        let res = self.#ident(ctx).await.map_err(|err| err.into_error_with_path(ctx.position(), ctx.path_node.as_ref().unwrap().to_json()))?;
+                        let res = #get_value.map_err(|err| err.into_error_with_path(ctx.position(), ctx.path_node.as_ref().unwrap().to_json()))?;
                         let ctx_obj = ctx.with_selection_set(&ctx.selection_set);
                         #post_guard
                         return #crate_name::OutputValueType::resolve(&res, &ctx_obj, ctx.item).await;

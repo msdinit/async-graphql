@@ -51,7 +51,7 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
                 let ty = match &method.sig.output {
                     ReturnType::Type(_, ty) => OutputType::parse(ty)?,
                     ReturnType::Default => {
-                        return Err(Error::new_spanned(&method.sig.output, "Missing type"))
+                        return Err(Error::new_spanned(&method.sig.output, "Missing type"));
                     }
                 };
                 let mut create_ctx = true;
@@ -154,7 +154,7 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
                     method.sig.output = syn::parse2::<ReturnType>(
                         quote! { -> #crate_name::FieldResult<#inner_ty> },
                     )
-                    .expect("invalid result type");
+                        .expect("invalid result type");
                 }
                 let do_find = quote! { self.#field_ident(ctx, #(#use_keys),*).await.map_err(|err| err.into_error(ctx.position()))? };
 
@@ -180,10 +180,6 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
                         .unwrap(),
                 );
             } else if let Some(field) = args::Field::parse(&crate_name, &method.attrs)? {
-                if method.sig.asyncness.is_none() {
-                    return Err(Error::new_spanned(&method, "Must be asynchronous"));
-                }
-
                 let field_name = field
                     .name
                     .clone()
@@ -211,7 +207,7 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
                 let ty = match &method.sig.output {
                     ReturnType::Type(_, ty) => OutputType::parse(ty)?,
                     ReturnType::Default => {
-                        return Err(Error::new_spanned(&method.sig.output, "Missing type"))
+                        return Err(Error::new_spanned(&method.sig.output, "Missing type"));
                     }
                 };
                 let cache_control = {
@@ -363,7 +359,7 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
                     method.sig.output = syn::parse2::<ReturnType>(
                         quote! { -> #crate_name::FieldResult<#inner_ty> },
                     )
-                    .expect("invalid result type");
+                        .expect("invalid result type");
                 }
 
                 method.block =
@@ -371,12 +367,17 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
                         let block = &method.block;
                         quote! { #block }
                     }))
-                    .expect("invalid block");
+                        .expect("invalid block");
+
+                let get_value = if method.sig.asyncness.is_some() {
+                    quote! { self.#field_ident(ctx, #(#use_params),*).await }
+                } else {
+                    quote! { self.#field_ident(ctx, #(#use_params),*) }
+                };
 
                 let resolve_obj = quote! {
                     {
-                        let res = self.#field_ident(ctx, #(#use_params),*).await;
-                        res.map_err(|err| err.into_error_with_path(ctx.position(), ctx.path_node.as_ref().unwrap().to_json()))?
+                        #get_value.map_err(|err| err.into_error_with_path(ctx.position(), ctx.path_node.as_ref().unwrap().to_json()))?
                     }
                 };
 

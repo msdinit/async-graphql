@@ -19,7 +19,7 @@ pub fn generate(interface_args: &args::Interface, input: &DeriveInput) -> Result
             return Err(Error::new_spanned(
                 input,
                 "Interfaces can only be applied to an enum.",
-            ))
+            ));
         }
     };
     let extends = interface_args.extends;
@@ -51,19 +51,19 @@ pub fn generate(interface_args: &args::Interface, input: &DeriveInput) -> Result
                 return Err(Error::new_spanned(
                     variant,
                     "Only single value variants are supported",
-                ))
+                ));
             }
             Fields::Unit => {
                 return Err(Error::new_spanned(
                     variant,
                     "Empty variants are not supported",
-                ))
+                ));
             }
             Fields::Named(_) => {
                 return Err(Error::new_spanned(
                     variant,
                     "Variants with named fields are not supported",
-                ))
+                ));
             }
         };
         if let Type::Path(p) = &field.ty {
@@ -121,6 +121,7 @@ pub fn generate(interface_args: &args::Interface, input: &DeriveInput) -> Result
         external,
         provides,
         requires,
+        sync,
     } in &interface_args.fields
     {
         let (name, method_name) = if let Some(method) = method {
@@ -188,8 +189,13 @@ pub fn generate(interface_args: &args::Interface, input: &DeriveInput) -> Result
         }
 
         for enum_name in &enum_names {
+            let call = if *sync {
+                quote! { obj.#method_name(#(#use_params),*) }
+            } else {
+                quote! { obj.#method_name(#(#use_params),*).await }
+            };
             calls.push(quote! {
-                #ident::#enum_name(obj) => obj.#method_name(#(#use_params),*).await
+                #ident::#enum_name(obj) => #call
             });
         }
 

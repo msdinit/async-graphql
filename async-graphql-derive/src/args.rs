@@ -67,6 +67,7 @@ pub struct Object {
     pub desc: Option<String>,
     pub cache_control: CacheControl,
     pub extends: bool,
+    pub sync: bool,
 }
 
 impl Object {
@@ -76,6 +77,7 @@ impl Object {
         let mut desc = None;
         let mut cache_control = CacheControl::default();
         let mut extends = false;
+        let mut sync = false;
 
         for arg in args {
             match arg {
@@ -84,6 +86,9 @@ impl Object {
                 }
                 NestedMeta::Meta(Meta::Path(p)) if p.is_ident("extends") => {
                     extends = true;
+                }
+                NestedMeta::Meta(Meta::Path(p)) if p.is_ident("sync") => {
+                    sync = true;
                 }
                 NestedMeta::Meta(Meta::NameValue(nv)) => {
                     if nv.path.is_ident("name") {
@@ -121,6 +126,7 @@ impl Object {
             desc,
             cache_control,
             extends,
+            sync,
         })
     }
 }
@@ -652,6 +658,7 @@ pub struct InterfaceField {
     pub external: bool,
     pub provides: Option<String>,
     pub requires: Option<String>,
+    pub sync: bool,
 }
 
 impl InterfaceField {
@@ -665,11 +672,15 @@ impl InterfaceField {
         let mut external = false;
         let mut provides = None;
         let mut requires = None;
+        let mut sync = false;
 
         for meta in &ls.nested {
             match meta {
                 NestedMeta::Meta(Meta::Path(p)) if p.is_ident("external") => {
                     external = true;
+                }
+                NestedMeta::Meta(Meta::Path(p)) if p.is_ident("sync") => {
+                    sync = true;
                 }
                 NestedMeta::Meta(Meta::NameValue(nv)) => {
                     if nv.path.is_ident("name") {
@@ -766,6 +777,7 @@ impl InterfaceField {
             external,
             requires,
             provides,
+            sync,
         })
     }
 }

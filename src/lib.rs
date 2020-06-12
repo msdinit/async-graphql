@@ -235,7 +235,9 @@ pub use types::{EnumItem, EnumType};
 /// ```ignore
 /// #[Object]
 /// impl QueryRoot {
-///     async fn value(&self, ctx: &Context<'_>) -> { ... }
+///     fn value1(&self, ctx: &Context<'_>) -> { ... }
+///
+///     async fn value2(&self, ctx: &Context<'_>) -> { ... }
 /// }
 /// ```
 ///
@@ -302,6 +304,7 @@ pub use async_graphql_derive::Object;
 /// | name          | Object name               | string   | Y        |
 /// | desc          | Object description        | string   | Y        |
 /// | cache_control | Object cache control      | [`CacheControl`](struct.CacheControl.html) | Y        |
+/// | sync          | All getters are synchronous | bool   | Y        |
 ///
 /// # Field parameters
 ///
@@ -510,6 +513,7 @@ pub use async_graphql_derive::InputObject;
 /// | desc        | Field description         | string   | Y        |
 /// | deprecation | Field deprecation reason  | string   | Y        |
 /// | args        | Field arguments           |          | Y        |
+/// | sync        | Forward to the synchronization function | bool | Y |
 ///
 /// # Field argument parameters
 ///

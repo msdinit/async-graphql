@@ -70,7 +70,7 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
                 let ty = match &method.sig.output {
                     ReturnType::Type(_, ty) => OutputType::parse(ty)?,
                     ReturnType::Default => {
-                        return Err(Error::new_spanned(&method.sig.output, "Missing type"))
+                        return Err(Error::new_spanned(&method.sig.output, "Missing type"));
                     }
                 };
 
@@ -202,7 +202,7 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
                     method.sig.output = syn::parse2::<ReturnType>(
                         quote! { -> #crate_name::FieldResult<#inner_ty> },
                     )
-                    .expect("invalid result type");
+                        .expect("invalid result type");
                 }
 
                 method.block =
@@ -210,7 +210,7 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
                         let block = &method.block;
                         quote! { #block }
                     }))
-                    .expect("invalid block");
+                        .expect("invalid block");
 
                 schema_fields.push(quote! {
                     fields.insert(#field_name.to_string(), #crate_name::registry::MetaField {
@@ -230,8 +230,13 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
                     });
                 });
 
+                let get_value = if method.sig.asyncness.is_some() {
+                    quote! { self.#ident(ctx, #(#use_params),*).await }
+                } else {
+                    quote! { self.#ident(ctx, #(#use_params),*) }
+                };
                 let create_field_stream = quote! {
-                    #crate_name::futures::stream::StreamExt::fuse(self.#ident(ctx, #(#use_params),*).await.
+                    #crate_name::futures::stream::StreamExt::fuse(#get_value.
                         map_err(|err| err.into_error_with_path(ctx.position(), ctx.path_node.as_ref().unwrap().to_json()))?)
                 };
 
