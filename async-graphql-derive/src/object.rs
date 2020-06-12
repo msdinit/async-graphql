@@ -154,7 +154,7 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
                     method.sig.output = syn::parse2::<ReturnType>(
                         quote! { -> #crate_name::FieldResult<#inner_ty> },
                     )
-                        .expect("invalid result type");
+                    .expect("invalid result type");
                 }
                 let do_find = quote! { self.#field_ident(ctx, #(#use_keys),*).await.map_err(|err| err.into_error(ctx.position()))? };
 
@@ -349,17 +349,26 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
                 let field_ident = &method.sig.ident;
                 if let OutputType::Value(inner_ty) = &ty {
                     let block = &method.block;
-                    let new_block = quote!({
-                        {
-                            let value:#inner_ty = async move #block.await;
-                            Ok(value)
-                        }
-                    });
+                    let new_block = if method.sig.asyncness.is_none() {
+                        quote!({
+                            {
+                                let value:#inner_ty = #block;
+                                Ok(value)
+                            }
+                        })
+                    } else {
+                        quote!({
+                            {
+                                let value:#inner_ty = async move #block.await;
+                                Ok(value)
+                            }
+                        })
+                    };
                     method.block = syn::parse2::<Block>(new_block).expect("invalid block");
                     method.sig.output = syn::parse2::<ReturnType>(
                         quote! { -> #crate_name::FieldResult<#inner_ty> },
                     )
-                        .expect("invalid result type");
+                    .expect("invalid result type");
                 }
 
                 method.block =
@@ -367,7 +376,7 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
                         let block = &method.block;
                         quote! { #block }
                     }))
-                        .expect("invalid block");
+                    .expect("invalid block");
 
                 let get_value = if method.sig.asyncness.is_some() {
                     quote! { self.#field_ident(ctx, #(#use_params),*).await }
