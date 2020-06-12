@@ -25,5 +25,9 @@ name = "simple"
 harness = false
 
 [[bench]]
-name = "chat"
+name = "async_chat"
+harness = false
+
+[[bench]]
+name = "sync_chat"
 harness = false
