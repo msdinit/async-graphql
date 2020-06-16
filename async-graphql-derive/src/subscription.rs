@@ -202,7 +202,7 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
                     method.sig.output = syn::parse2::<ReturnType>(
                         quote! { -> #crate_name::FieldResult<#inner_ty> },
                     )
-                        .expect("invalid result type");
+                    .expect("invalid result type");
                 }
 
                 method.block =
@@ -210,7 +210,7 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
                         let block = &method.block;
                         quote! { #block }
                     }))
-                        .expect("invalid block");
+                    .expect("invalid block");
 
                 schema_fields.push(quote! {
                     fields.insert(#field_name.to_string(), #crate_name::registry::MetaField {

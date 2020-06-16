@@ -1,6 +1,8 @@
 use crate::args;
 use crate::output_type::OutputType;
-use crate::utils::{feature_block, get_crate_name, get_param_getter_ident, get_rustdoc};
+use crate::utils::{
+    feature_block, get_crate_name, get_param_getter_ident, get_rustdoc, is_sync_scalar,
+};
 use inflector::Inflector;
 use proc_macro::TokenStream;
 use quote::quote;
@@ -403,6 +405,12 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
                             .map_err(|err| err.into_error_with_path(ctx.position(), ctx.path_node.as_ref().unwrap().to_json()))?;
                     });
 
+                let do_resolver = if !is_sync_scalar(&schema_ty) {
+                    quote! { #crate_name::OutputValueType::resolve(&res, &ctx_obj, ctx.item).await }
+                } else {
+                    quote! { Ok(#crate_name::ScalarType::to_value(&res).into()) }
+                };
+
                 resolvers.push(quote! {
                     if ctx.name.node == #field_name {
                         use #crate_name::OutputValueType;
@@ -411,7 +419,7 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
                         let ctx_obj = ctx.with_selection_set(&ctx.selection_set);
                         let res = #resolve_obj;
                         #post_guard
-                        return OutputValueType::resolve(&res, &ctx_obj, ctx.item).await;
+                        return #do_resolver;
                     }
                 });
 

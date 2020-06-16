@@ -3,8 +3,8 @@ use proc_macro2::{Span, TokenStream};
 use proc_macro_crate::crate_name;
 use quote::quote;
 use syn::{
-    Attribute, AttributeArgs, DeriveInput, Error, Expr, Ident, Lit, Meta, MetaList, NestedMeta,
-    Result,
+    Attribute, AttributeArgs, DeriveInput, Error, Expr, GenericArgument, Ident, Lit, Meta,
+    MetaList, NestedMeta, PathArguments, Result, Type,
 };
 
 pub fn get_crate_name(internal: bool) -> TokenStream {
@@ -260,7 +260,7 @@ pub fn get_rustdoc(attrs: &[Attribute]) -> Result<Option<String>> {
 
 pub fn parse_default(lit: &Lit) -> Result<TokenStream> {
     match lit {
-        Lit::Str(value) =>{
+        Lit::Str(value) => {
             let value = value.value();
             Ok(quote!({ #value.to_string() }))
         }
@@ -324,5 +324,66 @@ pub fn feature_block(
         })
     } else {
         block
+    }
+}
+
+pub fn is_sync_scalar(ty: &Type) -> bool {
+    const SYNC_SCALARS: &[&str] = &[
+        "i8", "i16", "i32", "i64", "u8", "u16", "u32", "u64", "bool", "f32", "f64", "String", "str",
+    ];
+
+    let path = if let Type::Reference(r) = ty {
+        return is_sync_scalar(&r.elem);
+    } else if let Type::Path(path) = ty {
+        path
+    } else {
+        return false;
+    };
+
+    for scalar_ty in SYNC_SCALARS {
+        if path.path.is_ident(scalar_ty) {
+            return true;
+        }
+    }
+
+    false
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_is_sync_scalar() {
+        fn test(s: &str, r: bool) {
+            let ty: Type = syn::parse_str(s).unwrap();
+            assert_eq!(is_sync_scalar(&ty), r);
+        }
+
+        test("i8", true);
+        test("i16", true);
+        test("i32", true);
+        test("i64", true);
+        test("u8", true);
+        test("u16", true);
+        test("u32", true);
+        test("u64", true);
+        test("bool", true);
+        test("f32", true);
+        test("f64", true);
+        test("String", true);
+        test("&str", true);
+        test("&i8", true);
+        test("&i16", true);
+        test("&i32", true);
+        test("&i64", true);
+        test("&u8", true);
+        test("&u16", true);
+        test("&u32", true);
+        test("&u64", true);
+        test("&bool", true);
+        test("&f32", true);
+        test("&f64", true);
+        test("&String", true);
     }
 }
