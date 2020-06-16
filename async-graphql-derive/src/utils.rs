@@ -3,8 +3,8 @@ use proc_macro2::{Span, TokenStream};
 use proc_macro_crate::crate_name;
 use quote::quote;
 use syn::{
-    Attribute, AttributeArgs, DeriveInput, Error, Expr, GenericArgument, Ident, Lit, Meta,
-    MetaList, NestedMeta, PathArguments, Result, Type,
+    Attribute, AttributeArgs, DeriveInput, Error, Expr, Ident, Lit, Meta, MetaList, NestedMeta,
+    Result, Type,
 };
 
 pub fn get_crate_name(internal: bool) -> TokenStream {

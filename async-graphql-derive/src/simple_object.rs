@@ -143,11 +143,7 @@ pub fn generate(object_args: &args::Object, input: &DeriveInput) -> Result<Token
                 let do_resolver = if !is_sync_scalar(ty) {
                     quote! { #crate_name::OutputValueType::resolve(&res, &ctx_obj, ctx.item).await }
                 } else {
-                    if field.is_ref {
-                        quote! { Ok(#crate_name::ScalarType::to_value(res).into()) }
-                    } else {
-                        quote! { Ok(#crate_name::ScalarType::to_value(&res).into()) }
-                    }
+                    quote! { Ok(#crate_name::ScalarType::to_value(res.as_ref()).into()) }
                 };
 
                 resolvers.push(quote! {
