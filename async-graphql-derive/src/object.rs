@@ -406,14 +406,15 @@ pub fn generate(object_args: &args::Object, item_impl: &mut ItemImpl) -> Result<
                     });
 
                 let do_resolver = if !is_sync_scalar(&schema_ty) {
-                    quote! { #crate_name::OutputValueType::resolve(&res, &ctx_obj, ctx.item).await }
+                    quote! { res.resolve(&ctx_obj, ctx.item).await }
                 } else {
-                    quote! { Ok(#crate_name::ScalarType::to_value(res.as_ref()).into()) }
+                    quote! { Ok(res.to_scalar_value().into()) }
                 };
 
                 resolvers.push(quote! {
                     if ctx.name.node == #field_name {
-                        use #crate_name::OutputValueType;
+                        #[allow(unused_imports)]
+                        use #crate_name::{OutputValueType, ScalarType};
                         #(#get_params)*
                         #guard
                         let ctx_obj = ctx.with_selection_set(&ctx.selection_set);

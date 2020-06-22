@@ -19,7 +19,7 @@ impl ScalarType for f32 {
         }
     }
 
-    fn to_value(&self) -> Value {
+    fn to_scalar_value(&self) -> Value {
         Value::Float(*self as f64)
     }
 }
@@ -42,7 +42,7 @@ impl ScalarType for f64 {
         }
     }
 
-    fn to_value(&self) -> Value {
+    fn to_scalar_value(&self) -> Value {
         Value::Float(*self as f64)
     }
 }

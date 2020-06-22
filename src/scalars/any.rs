@@ -19,7 +19,7 @@ impl ScalarType for Any {
         true
     }
 
-    fn to_value(&self) -> Value {
+    fn to_scalar_value(&self) -> Value {
         self.0.clone()
     }
 }
@@ -27,7 +27,7 @@ impl ScalarType for Any {
 impl Any {
     /// Parse this `Any` value to T by `serde_json`.
     pub fn parse_value<T: DeserializeOwned>(&self) -> std::result::Result<T, serde_json::Error> {
-        serde_json::from_value(self.to_value().into())
+        serde_json::from_value(self.to_scalar_value().into())
     }
 }
 

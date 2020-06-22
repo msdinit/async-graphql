@@ -11,7 +11,7 @@ impl ScalarType for NaiveDate {
         }
     }
 
-    fn to_value(&self) -> Value {
+    fn to_scalar_value(&self) -> Value {
         Value::String(self.format("%Y-%m-%d").to_string())
     }
 }

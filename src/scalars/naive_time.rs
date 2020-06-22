@@ -11,7 +11,7 @@ impl ScalarType for NaiveTime {
         }
     }
 
-    fn to_value(&self) -> Value {
+    fn to_scalar_value(&self) -> Value {
         Value::String(self.format("%H:%M:%S").to_string())
     }
 }

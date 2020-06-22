@@ -141,13 +141,15 @@ pub fn generate(object_args: &args::Object, input: &DeriveInput) -> Result<Token
                 };
 
                 let do_resolver = if !is_sync_scalar(ty) {
-                    quote! { #crate_name::OutputValueType::resolve(&res, &ctx_obj, ctx.item).await }
+                    quote! { res.resolve(&ctx_obj, ctx.item).await }
                 } else {
-                    quote! { Ok(#crate_name::ScalarType::to_value(res.as_ref()).into()) }
+                    quote! { Ok(res.to_scalar_value().into()) }
                 };
 
                 resolvers.push(quote! {
                     if ctx.name.node == #field_name {
+                        #[allow(unused_imports)]
+                        use #crate_name::{OutputValueType, ScalarType};
                         #guard
                         let res = #get_value.map_err(|err| err.into_error_with_path(ctx.position(), ctx.path_node.as_ref().unwrap().to_json()))?;
                         #post_guard

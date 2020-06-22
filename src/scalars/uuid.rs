@@ -11,7 +11,7 @@ impl ScalarType for Uuid {
         }
     }
 
-    fn to_value(&self) -> Value {
+    fn to_scalar_value(&self) -> Value {
         Value::String(self.to_string())
     }
 }

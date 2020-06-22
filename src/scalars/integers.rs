@@ -18,7 +18,7 @@ impl ScalarType for i8 {
         }
     }
 
-    fn to_value(&self) -> Value {
+    fn to_scalar_value(&self) -> Value {
         Value::Int(*self as i32)
     }
 }
@@ -40,7 +40,7 @@ impl ScalarType for i16 {
         }
     }
 
-    fn to_value(&self) -> Value {
+    fn to_scalar_value(&self) -> Value {
         Value::Int(*self as i32)
     }
 }
@@ -62,7 +62,7 @@ impl ScalarType for i32 {
         }
     }
 
-    fn to_value(&self) -> Value {
+    fn to_scalar_value(&self) -> Value {
         Value::Int(*self as i32)
     }
 }
@@ -84,7 +84,7 @@ impl ScalarType for u8 {
         }
     }
 
-    fn to_value(&self) -> Value {
+    fn to_scalar_value(&self) -> Value {
         Value::Int(*self as i32)
     }
 }
@@ -106,7 +106,7 @@ impl ScalarType for u16 {
         }
     }
 
-    fn to_value(&self) -> Value {
+    fn to_scalar_value(&self) -> Value {
         Value::Int(*self as i32)
     }
 }
@@ -129,7 +129,7 @@ impl ScalarType for i64 {
         }
     }
 
-    fn to_value(&self) -> Value {
+    fn to_scalar_value(&self) -> Value {
         Value::String(self.to_string())
     }
 }
@@ -157,7 +157,7 @@ impl ScalarType for u32 {
         }
     }
 
-    fn to_value(&self) -> Value {
+    fn to_scalar_value(&self) -> Value {
         Value::String(self.to_string())
     }
 }
@@ -185,7 +185,7 @@ impl ScalarType for u64 {
         }
     }
 
-    fn to_value(&self) -> Value {
+    fn to_scalar_value(&self) -> Value {
         Value::String(self.to_string())
     }
 }

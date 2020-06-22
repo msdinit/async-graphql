@@ -123,7 +123,7 @@ pub trait InputObjectType: InputValueType {}
 ///         }
 ///     }
 ///
-///     fn to_value(&self) -> Value {
+///     fn to_scalar_value(&self) -> Value {
 ///         Value::Int(self.0)
 ///     }
 /// }
@@ -140,7 +140,7 @@ pub trait ScalarType: Sized + Send {
     }
 
     /// Convert the scalar to `Value`.
-    fn to_value(&self) -> Value;
+    fn to_scalar_value(&self) -> Value;
 }
 
 impl<T: Type + Send + Sync> Type for &T {

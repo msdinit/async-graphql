@@ -12,7 +12,7 @@ impl ScalarType for ObjectId {
         }
     }
 
-    fn to_value(&self) -> Value {
+    fn to_scalar_value(&self) -> Value {
         Value::String(self.to_string())
     }
 }
@@ -23,7 +23,7 @@ impl ScalarType for UtcDateTime {
         DateTime::<Utc>::parse(value).map(UtcDateTime::from)
     }
 
-    fn to_value(&self) -> Value {
-        (**self).to_value()
+    fn to_scalar_value(&self) -> Value {
+        (**self).to_scalar_value()
     }
 }

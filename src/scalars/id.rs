@@ -89,7 +89,7 @@ impl ScalarType for ID {
         }
     }
 
-    fn to_value(&self) -> Value {
+    fn to_scalar_value(&self) -> Value {
         Value::String(self.0.clone())
     }
 }

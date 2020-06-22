@@ -51,7 +51,7 @@ pub fn generate(scalar_args: &args::Scalar, item_impl: &mut ItemImpl) -> Result<
             }
 
             fn to_value(&self) -> #crate_name::Value {
-                <#self_ty as #crate_name::ScalarType>::to_value(self)
+                <#self_ty as #crate_name::ScalarType>::to_scalar_value(self)
             }
         }
 
@@ -63,7 +63,7 @@ pub fn generate(scalar_args: &args::Scalar, item_impl: &mut ItemImpl) -> Result<
                 _: &#crate_name::ContextSelectionSet<'_>,
                 _field: &#crate_name::Positioned<#crate_name::parser::query::Field>
             ) -> #crate_name::Result<#crate_name::serde_json::Value> {
-                Ok(#crate_name::ScalarType::to_value(self).into())
+                Ok(#crate_name::ScalarType::to_scalar_value(self).into())
             }
         }
     };

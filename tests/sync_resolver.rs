@@ -1,4 +1,5 @@
 use async_graphql::*;
+use log::kv::ToValue;
 
 #[async_std::test]
 pub async fn test_sync_resolver() {
@@ -15,6 +16,10 @@ pub async fn test_sync_resolver() {
     impl MyObj {
         fn value1(&self) -> i32 {
             10
+        }
+
+        fn value2(&self) -> &String {
+            todo!()
         }
     }
 

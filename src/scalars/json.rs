@@ -29,7 +29,7 @@ impl<T: DeserializeOwned + Serialize + Send + Sync> ScalarType for Json<T> {
         Ok(serde_json::from_value(value.into()).map(Json)?)
     }
 
-    fn to_value(&self) -> Value {
+    fn to_scalar_value(&self) -> Value {
         serde_json::to_value(&self.0)
             .unwrap_or_else(|_| serde_json::Value::Null)
             .into()

@@ -18,7 +18,7 @@ impl ScalarType for bool {
         }
     }
 
-    fn to_value(&self) -> Value {
+    fn to_scalar_value(&self) -> Value {
         Value::Boolean(*self)
     }
 }

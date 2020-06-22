@@ -14,7 +14,7 @@ impl ScalarType for DateTime<Utc> {
         }
     }
 
-    fn to_value(&self) -> Value {
+    fn to_scalar_value(&self) -> Value {
         Value::String(self.to_rfc3339())
     }
 }
