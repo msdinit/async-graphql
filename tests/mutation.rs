@@ -34,7 +34,6 @@ pub async fn test_mutation_execution_order() {
     schema
         .execute("mutation { append1 append2 }")
         .await
-        .unwrap_single()
         .unwrap();
     assert_eq!(list.lock().await[0], 1);
     assert_eq!(list.lock().await[1], 2);
@@ -68,7 +67,6 @@ pub async fn test_mutation_fragment() {
         }"#,
         )
         .await
-        .unwrap_single()
         .unwrap();
     assert_eq!(
         resp.data,

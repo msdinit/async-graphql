@@ -65,7 +65,6 @@ pub async fn test_connection_additional_fields() {
         schema
             .execute("{ numbers(first: 2) { totalCount edges { node diff } } }")
             .await
-            .unwrap_single()
             .unwrap()
             .data,
         serde_json::json!({
@@ -83,7 +82,6 @@ pub async fn test_connection_additional_fields() {
         schema
             .execute("{ numbers(last: 2) { edges { node diff } } }")
             .await
-            .unwrap_single()
             .unwrap()
             .data,
         serde_json::json!({

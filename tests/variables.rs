@@ -63,7 +63,6 @@ pub async fn test_variable_default_value() {
         "#,
         )
         .await
-        .unwrap_single()
         .unwrap();
     assert_eq!(
         resp.data,

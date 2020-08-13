@@ -8,7 +8,7 @@ use crate::types::QueryRoot;
 use crate::validation::{check_rules, CheckResult, ValidationMode};
 use crate::{
     BatchQueryResponse, CacheControl, Error, ObjectType, ParseRequestError, Pos, QueryBuilder,
-    QueryEnv, QueryError, Result, SubscriptionType, Type, Variables, ID,
+    QueryEnv, QueryError, QueryResponse, Result, SubscriptionType, Type, Variables, ID,
 };
 use async_graphql_parser::query::{Document, OperationType};
 use bytes::Bytes;
@@ -289,11 +289,12 @@ where
     }
 
     /// Execute query without creating the `QueryBuilder`.
-    pub async fn execute(&self, query_source: &str) -> BatchQueryResponse {
+    pub async fn execute(&self, query_source: &str) -> Result<QueryResponse> {
         QueryBuilder::new_single(query_source)
             .finish()
             .execute(self)
             .await
+            .unwrap_single()
     }
 
     /// Execute batch without creating the `BatchQueryBuilder`.

@@ -109,7 +109,6 @@ mod tests {
         }"#,
             )
             .await
-            .unwrap_single()
             .unwrap();
 
         schema
@@ -121,7 +120,6 @@ mod tests {
         }"#,
             )
             .await
-            .unwrap_single()
             .unwrap();
 
         schema
@@ -135,7 +133,6 @@ mod tests {
         }"#,
             )
             .await
-            .unwrap_single()
             .unwrap();
 
         schema
@@ -147,7 +144,6 @@ mod tests {
         }"#,
             )
             .await
-            .unwrap_single()
             .unwrap();
 
         schema
@@ -161,7 +157,6 @@ mod tests {
         }"#,
             )
             .await
-            .unwrap_single()
             .unwrap();
 
         schema
@@ -177,7 +172,6 @@ mod tests {
         }"#,
             )
             .await
-            .unwrap_single()
             .unwrap();
 
         schema
@@ -193,7 +187,6 @@ mod tests {
         }"#,
             )
             .await
-            .unwrap_single()
             .unwrap();
 
         schema
@@ -211,7 +204,6 @@ mod tests {
         }"#,
             )
             .await
-            .unwrap_single()
             .unwrap();
     }
 }

@@ -62,7 +62,6 @@ pub async fn test_input_validator_string_min_length() {
                 schema
                     .execute(&field_query)
                     .await
-                    .unwrap_single()
                     .expect_err(&should_fail_msg[..]),
                 Error::Rule {
                     errors: vec!(RuleError {
@@ -79,7 +78,6 @@ pub async fn test_input_validator_string_min_length() {
                 schema
                     .execute(&object_query)
                     .await
-                    .unwrap_single()
                     .expect_err(&should_fail_msg[..]),
                 Error::Rule {
                     errors: vec!(RuleError {
@@ -97,7 +95,6 @@ pub async fn test_input_validator_string_min_length() {
                 schema
                     .execute(&field_query)
                     .await
-                    .unwrap_single()
                     .expect(&error_msg[..])
                     .data,
                 serde_json::json!({"fieldParameter": true}),
@@ -109,7 +106,6 @@ pub async fn test_input_validator_string_min_length() {
                 schema
                     .execute(&object_query)
                     .await
-                    .unwrap_single()
                     .expect(&error_msg[..])
                     .data,
                 serde_json::json!({"inputObject": true}),
@@ -172,7 +168,6 @@ pub async fn test_input_validator_string_max_length() {
                 schema
                     .execute(&field_query)
                     .await
-                    .unwrap_single()
                     .expect_err(&should_fail_msg[..]),
                 Error::Rule {
                     errors: vec!(RuleError {
@@ -189,7 +184,6 @@ pub async fn test_input_validator_string_max_length() {
                 schema
                     .execute(&object_query)
                     .await
-                    .unwrap_single()
                     .expect_err(&should_fail_msg[..]),
                 Error::Rule {
                     errors: vec!(RuleError {
@@ -207,7 +201,6 @@ pub async fn test_input_validator_string_max_length() {
                 schema
                     .execute(&field_query)
                     .await
-                    .unwrap_single()
                     .expect(&error_msg[..])
                     .data,
                 serde_json::json!({"fieldParameter": true}),
@@ -219,7 +212,6 @@ pub async fn test_input_validator_string_max_length() {
                 schema
                     .execute(&object_query)
                     .await
-                    .unwrap_single()
                     .expect(&error_msg[..])
                     .data,
                 serde_json::json!({"inputObject": true}),
@@ -309,7 +301,6 @@ pub async fn test_input_validator_string_email() {
                 schema
                     .execute(&field_query)
                     .await
-                    .unwrap_single()
                     .expect_err(&should_fail_msg[..]),
                 Error::Rule {
                     errors: vec!(RuleError {
@@ -327,7 +318,6 @@ pub async fn test_input_validator_string_email() {
                 schema
                     .execute(&object_query)
                     .await
-                    .unwrap_single()
                     .expect_err(&should_fail_msg[..]),
                 Error::Rule {
                     errors: vec!(RuleError {
@@ -347,7 +337,6 @@ pub async fn test_input_validator_string_email() {
                 schema
                     .execute(&field_query)
                     .await
-                    .unwrap_single()
                     .expect(&error_msg[..])
                     .data,
                 serde_json::json!({"fieldParameter": true}),
@@ -359,7 +348,6 @@ pub async fn test_input_validator_string_email() {
                 schema
                     .execute(&object_query)
                     .await
-                    .unwrap_single()
                     .expect(&error_msg[..])
                     .data,
                 serde_json::json!({"inputObject": true}),
@@ -457,7 +445,6 @@ pub async fn test_input_validator_string_mac() {
             schema_without_colon
                 .execute(&field_query)
                 .await
-                .unwrap_single()
                 .expect_err(&should_fail_msg[..]),
             Error::Rule {
                 errors: vec!(RuleError {
@@ -475,7 +462,6 @@ pub async fn test_input_validator_string_mac() {
             schema_without_colon
                 .execute(&object_query)
                 .await
-                .unwrap_single()
                 .expect_err(&should_fail_msg[..]),
             Error::Rule {
                 errors: vec!(RuleError {
@@ -492,7 +478,6 @@ pub async fn test_input_validator_string_mac() {
             schema_with_colon
                 .execute(&field_query)
                 .await
-                .unwrap_single()
                 .expect_err(&should_fail_msg[..]),
             Error::Rule {
                 errors: vec!(RuleError {
@@ -510,7 +495,6 @@ pub async fn test_input_validator_string_mac() {
             schema_with_colon
                 .execute(&object_query)
                 .await
-                .unwrap_single()
                 .expect_err(&should_fail_msg[..]),
             Error::Rule {
                 errors: vec!(RuleError {
@@ -543,7 +527,6 @@ pub async fn test_input_validator_string_mac() {
                 schema_with_colon
                     .execute(&field_query)
                     .await
-                    .unwrap_single()
                     .expect(&error_msg[..])
                     .data,
                 serde_json::json!({"fieldParameter": true}),
@@ -555,7 +538,6 @@ pub async fn test_input_validator_string_mac() {
                 schema_with_colon
                     .execute(&object_query)
                     .await
-                    .unwrap_single()
                     .expect(&error_msg[..])
                     .data,
                 serde_json::json!({"inputObject": true}),
@@ -567,7 +549,6 @@ pub async fn test_input_validator_string_mac() {
                 schema_without_colon
                     .execute(&field_query)
                     .await
-                    .unwrap_single()
                     .expect_err(&should_fail_msg[..]),
                 Error::Rule {
                     errors: vec!(RuleError {
@@ -585,7 +566,6 @@ pub async fn test_input_validator_string_mac() {
                 schema_without_colon
                     .execute(&object_query)
                     .await
-                    .unwrap_single()
                     .expect_err(&should_fail_msg[..]),
                 Error::Rule {
                     errors: vec!(RuleError {
@@ -602,7 +582,6 @@ pub async fn test_input_validator_string_mac() {
                 schema_without_colon
                     .execute(&field_query)
                     .await
-                    .unwrap_single()
                     .expect(&error_msg[..])
                     .data,
                 serde_json::json!({"fieldParameter": true}),
@@ -614,7 +593,6 @@ pub async fn test_input_validator_string_mac() {
                 schema_without_colon
                     .execute(&object_query)
                     .await
-                    .unwrap_single()
                     .expect(&error_msg[..])
                     .data,
                 serde_json::json!({"inputObject": true}),
@@ -626,7 +604,6 @@ pub async fn test_input_validator_string_mac() {
                 schema_with_colon
                     .execute(&field_query)
                     .await
-                    .unwrap_single()
                     .expect_err(&should_fail_msg[..]),
                 Error::Rule {
                     errors: vec!(RuleError {
@@ -644,7 +621,6 @@ pub async fn test_input_validator_string_mac() {
                 schema_with_colon
                     .execute(&object_query)
                     .await
-                    .unwrap_single()
                     .expect_err(&should_fail_msg[..]),
                 Error::Rule {
                     errors: vec!(RuleError {
@@ -704,7 +680,6 @@ pub async fn test_input_validator_int_range() {
                 schema
                     .execute(&field_query)
                     .await
-                    .unwrap_single()
                     .expect_err(&should_fail_msg[..]),
                 Error::Rule {
                     errors: vec!(RuleError {
@@ -721,7 +696,6 @@ pub async fn test_input_validator_int_range() {
                 schema
                     .execute(&object_query)
                     .await
-                    .unwrap_single()
                     .expect_err(&should_fail_msg[..]),
                 Error::Rule {
                     errors: vec!(RuleError {
@@ -739,7 +713,6 @@ pub async fn test_input_validator_int_range() {
                 schema
                     .execute(&field_query)
                     .await
-                    .unwrap_single()
                     .expect(&error_msg[..])
                     .data,
                 serde_json::json!({"fieldParameter": true}),
@@ -751,7 +724,6 @@ pub async fn test_input_validator_int_range() {
                 schema
                     .execute(&object_query)
                     .await
-                    .unwrap_single()
                     .expect(&error_msg[..])
                     .data,
                 serde_json::json!({"inputObject": true}),
@@ -809,7 +781,6 @@ pub async fn test_input_validator_int_less_than() {
                 schema
                     .execute(&field_query)
                     .await
-                    .unwrap_single()
                     .expect_err(&should_fail_msg[..]),
                 Error::Rule {
                     errors: vec!(RuleError {
@@ -826,7 +797,6 @@ pub async fn test_input_validator_int_less_than() {
                 schema
                     .execute(&object_query)
                     .await
-                    .unwrap_single()
                     .expect_err(&should_fail_msg[..]),
                 Error::Rule {
                     errors: vec!(RuleError {
@@ -844,7 +814,6 @@ pub async fn test_input_validator_int_less_than() {
                 schema
                     .execute(&field_query)
                     .await
-                    .unwrap_single()
                     .expect(&error_msg[..])
                     .data,
                 serde_json::json!({"fieldParameter": true}),
@@ -856,7 +825,6 @@ pub async fn test_input_validator_int_less_than() {
                 schema
                     .execute(&object_query)
                     .await
-                    .unwrap_single()
                     .expect(&error_msg[..])
                     .data,
                 serde_json::json!({"inputObject": true}),
@@ -916,7 +884,6 @@ pub async fn test_input_validator_int_greater_than() {
                 schema
                     .execute(&field_query)
                     .await
-                    .unwrap_single()
                     .expect_err(&should_fail_msg[..]),
                 Error::Rule {
                     errors: vec!(RuleError {
@@ -933,7 +900,6 @@ pub async fn test_input_validator_int_greater_than() {
                 schema
                     .execute(&object_query)
                     .await
-                    .unwrap_single()
                     .expect_err(&should_fail_msg[..]),
                 Error::Rule {
                     errors: vec!(RuleError {
@@ -951,7 +917,6 @@ pub async fn test_input_validator_int_greater_than() {
                 schema
                     .execute(&field_query)
                     .await
-                    .unwrap_single()
                     .expect(&error_msg[..])
                     .data,
                 serde_json::json!({"fieldParameter": true}),
@@ -963,7 +928,6 @@ pub async fn test_input_validator_int_greater_than() {
                 schema
                     .execute(&object_query)
                     .await
-                    .unwrap_single()
                     .expect(&error_msg[..])
                     .data,
                 serde_json::json!({"inputObject": true}),
@@ -1016,7 +980,6 @@ pub async fn test_input_validator_int_nonzero() {
                 schema
                     .execute(&field_query)
                     .await
-                    .unwrap_single()
                     .expect_err(&should_fail_msg[..]),
                 Error::Rule {
                     errors: vec!(RuleError {
@@ -1033,7 +996,6 @@ pub async fn test_input_validator_int_nonzero() {
                 schema
                     .execute(&object_query)
                     .await
-                    .unwrap_single()
                     .expect_err(&should_fail_msg[..]),
                 Error::Rule {
                     errors: vec!(RuleError {
@@ -1051,7 +1013,6 @@ pub async fn test_input_validator_int_nonzero() {
                 schema
                     .execute(&field_query)
                     .await
-                    .unwrap_single()
                     .expect(&error_msg[..])
                     .data,
                 serde_json::json!({"fieldParameter": true}),
@@ -1063,7 +1024,6 @@ pub async fn test_input_validator_int_nonzero() {
                 schema
                     .execute(&object_query)
                     .await
-                    .unwrap_single()
                     .expect(&error_msg[..])
                     .data,
                 serde_json::json!({"inputObject": true}),
@@ -1117,7 +1077,6 @@ pub async fn test_input_validator_int_equal() {
                 schema
                     .execute(&field_query)
                     .await
-                    .unwrap_single()
                     .expect_err(&should_fail_msg[..]),
                 Error::Rule {
                     errors: vec!(RuleError {
@@ -1134,7 +1093,6 @@ pub async fn test_input_validator_int_equal() {
                 schema
                     .execute(&object_query)
                     .await
-                    .unwrap_single()
                     .expect_err(&should_fail_msg[..]),
                 Error::Rule {
                     errors: vec!(RuleError {
@@ -1152,7 +1110,6 @@ pub async fn test_input_validator_int_equal() {
                 schema
                     .execute(&field_query)
                     .await
-                    .unwrap_single()
                     .expect(&error_msg[..])
                     .data,
                 serde_json::json!({"fieldParameter": true}),
@@ -1164,7 +1121,6 @@ pub async fn test_input_validator_int_equal() {
                 schema
                     .execute(&object_query)
                     .await
-                    .unwrap_single()
                     .expect(&error_msg[..])
                     .data,
                 serde_json::json!({"inputObject": true}),
@@ -1233,7 +1189,6 @@ pub async fn test_input_validator_list_max_length() {
                 schema
                     .execute(&field_query)
                     .await
-                    .unwrap_single()
                     .expect_err(&should_fail_msg[..]),
                 Error::Rule {
                     errors: vec!(RuleError {
@@ -1250,7 +1205,6 @@ pub async fn test_input_validator_list_max_length() {
                 schema
                     .execute(&object_query)
                     .await
-                    .unwrap_single()
                     .expect_err(&should_fail_msg[..]),
                 Error::Rule {
                     errors: vec!(RuleError {
@@ -1268,7 +1222,6 @@ pub async fn test_input_validator_list_max_length() {
                 schema
                     .execute(&field_query)
                     .await
-                    .unwrap_single()
                     .expect(&error_msg[..])
                     .data,
                 serde_json::json!({"fieldParameter": true}),
@@ -1280,7 +1233,6 @@ pub async fn test_input_validator_list_max_length() {
                 schema
                     .execute(&object_query)
                     .await
-                    .unwrap_single()
                     .expect(&error_msg[..])
                     .data,
                 serde_json::json!({"inputObject": true}),
@@ -1349,7 +1301,6 @@ pub async fn test_input_validator_list_min_length() {
                 schema
                     .execute(&field_query)
                     .await
-                    .unwrap_single()
                     .expect_err(&should_fail_msg[..]),
                 Error::Rule {
                     errors: vec!(RuleError {
@@ -1366,7 +1317,6 @@ pub async fn test_input_validator_list_min_length() {
                 schema
                     .execute(&object_query)
                     .await
-                    .unwrap_single()
                     .expect_err(&should_fail_msg[..]),
                 Error::Rule {
                     errors: vec!(RuleError {
@@ -1384,7 +1334,6 @@ pub async fn test_input_validator_list_min_length() {
                 schema
                     .execute(&field_query)
                     .await
-                    .unwrap_single()
                     .expect(&error_msg[..])
                     .data,
                 serde_json::json!({"fieldParameter": true}),
@@ -1396,7 +1345,6 @@ pub async fn test_input_validator_list_min_length() {
                 schema
                     .execute(&object_query)
                     .await
-                    .unwrap_single()
                     .expect(&error_msg[..])
                     .data,
                 serde_json::json!({"inputObject": true}),
@@ -1472,7 +1420,6 @@ pub async fn test_input_validator_operator_or() {
                 schema
                     .execute(&field_query)
                     .await
-                    .unwrap_single()
                     .expect_err(&should_fail_msg[..]),
                 Error::Rule {
                     errors: vec!(RuleError {
@@ -1489,7 +1436,6 @@ pub async fn test_input_validator_operator_or() {
                 schema
                     .execute(&object_query)
                     .await
-                    .unwrap_single()
                     .expect_err(&should_fail_msg[..]),
                 Error::Rule {
                     errors: vec!(RuleError {
@@ -1507,7 +1453,6 @@ pub async fn test_input_validator_operator_or() {
                 schema
                     .execute(&field_query)
                     .await
-                    .unwrap_single()
                     .expect(&error_msg[..])
                     .data,
                 serde_json::json!({"fieldParameter": true}),
@@ -1519,7 +1464,6 @@ pub async fn test_input_validator_operator_or() {
                 schema
                     .execute(&object_query)
                     .await
-                    .unwrap_single()
                     .expect(&error_msg[..])
                     .data,
                 serde_json::json!({"inputObject": true}),
@@ -1589,7 +1533,6 @@ pub async fn test_input_validator_operator_and() {
                 schema
                     .execute(&field_query)
                     .await
-                    .unwrap_single()
                     .expect_err(&should_fail_msg[..]),
                 Error::Rule {
                     errors: vec!(RuleError {
@@ -1606,7 +1549,6 @@ pub async fn test_input_validator_operator_and() {
                 schema
                     .execute(&object_query)
                     .await
-                    .unwrap_single()
                     .expect_err(&should_fail_msg[..]),
                 Error::Rule {
                     errors: vec!(RuleError {
@@ -1624,7 +1566,6 @@ pub async fn test_input_validator_operator_and() {
                 schema
                     .execute(&field_query)
                     .await
-                    .unwrap_single()
                     .expect(&error_msg[..])
                     .data,
                 serde_json::json!({"fieldParameter": true}),
@@ -1636,7 +1577,6 @@ pub async fn test_input_validator_operator_and() {
                 schema
                     .execute(&object_query)
                     .await
-                    .unwrap_single()
                     .expect(&error_msg[..])
                     .data,
                 serde_json::json!({"inputObject": true}),
